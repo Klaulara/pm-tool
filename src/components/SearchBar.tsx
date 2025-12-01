@@ -1,0 +1,31 @@
+import React from 'react';
+import { Flex, Input, Button } from './ui';
+
+interface SearchBarProps {
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    setIsCreateModalOpen: (isOpen: boolean) => void;
+}
+
+const SearchBar = ({ searchQuery, setSearchQuery, setIsCreateModalOpen }: SearchBarProps) => {
+    return (
+        <Flex gap="md">
+            <div style={{ flex: 1 }}>
+                <Input
+                    type="text"
+                    placeholder="🔍 Buscar tableros..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    fullWidth
+                    size="lg"
+                />
+            </div>
+            <Button variant="primary" size="lg" onClick={() => setIsCreateModalOpen(true)}>
+                <span>➕</span> Nuevo Tablero
+            </Button>
+        </Flex>
+
+    )
+}
+
+export default SearchBar

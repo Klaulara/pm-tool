@@ -1,3 +1,15 @@
+// Design System Theme Configuration
+
+export const spacing = {
+  xs: '4px',
+  sm: '8px',
+  md: '16px',
+  lg: '24px',
+  xl: '32px',
+  xxl: '48px',
+  xxxl: '64px',
+} as const;
+
 export const typography = {
   // Font Families
   fonts: {
@@ -237,21 +249,179 @@ export const colors = {
   },
 } as const;
 
+export const shadows = {
+  light: {
+    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    xxl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  },
+  dark: {
+    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.3)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
+    xxl: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+  },
+} as const;
+
+export const borderRadius = {
+  none: '0',
+  sm: '4px',
+  md: '8px',
+  lg: '12px',
+  xl: '16px',
+  xxl: '24px',
+  full: '9999px',
+} as const;
+
+export const transitions = {
+  duration: {
+    fast: '150ms',
+    normal: '250ms',
+    slow: '350ms',
+    slower: '500ms',
+  },
+  
+  easing: {
+    default: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    smooth: 'cubic-bezier(0.4, 0, 0.6, 1)',
+    bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+    easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+    easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  },
+} as const;
+
+export const zIndex = {
+  dropdown: 1000,
+  sticky: 1020,
+  fixed: 1030,
+  modalBackdrop: 1040,
+  modal: 1050,
+  popover: 1060,
+  tooltip: 1070,
+} as const;
+
+// Animation Keyframes
+export const animations = {
+  fadeIn: {
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  },
+  
+  fadeOut: {
+    from: { opacity: 1 },
+    to: { opacity: 0 },
+  },
+  
+  slideInUp: {
+    from: { 
+      transform: 'translateY(20px)', 
+      opacity: 0 
+    },
+    to: { 
+      transform: 'translateY(0)', 
+      opacity: 1 
+    },
+  },
+  
+  slideInDown: {
+    from: { 
+      transform: 'translateY(-20px)', 
+      opacity: 0 
+    },
+    to: { 
+      transform: 'translateY(0)', 
+      opacity: 1 
+    },
+  },
+  
+  slideInLeft: {
+    from: { 
+      transform: 'translateX(-20px)', 
+      opacity: 0 
+    },
+    to: { 
+      transform: 'translateX(0)', 
+      opacity: 1 
+    },
+  },
+  
+  slideInRight: {
+    from: { 
+      transform: 'translateX(20px)', 
+      opacity: 0 
+    },
+    to: { 
+      transform: 'translateX(0)', 
+      opacity: 1 
+    },
+  },
+  
+  scaleIn: {
+    from: { 
+      transform: 'scale(0.95)', 
+      opacity: 0 
+    },
+    to: { 
+      transform: 'scale(1)', 
+      opacity: 1 
+    },
+  },
+  
+  pulse: {
+    '0%, 100%': { opacity: 1 },
+    '50%': { opacity: 0.5 },
+  },
+  
+  shake: {
+    '0%, 100%': { transform: 'translateX(0)' },
+    '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+    '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
+  },
+  
+  rotate: {
+    from: { transform: 'rotate(0deg)' },
+    to: { transform: 'rotate(360deg)' },
+  },
+} as const;
+
+// Theme Type Definition
 export interface Theme {
   colors: typeof colors.light | typeof colors.dark;
+  spacing: typeof spacing;
   typography: typeof typography;
   breakpoints: typeof breakpoints;
+  shadows: typeof shadows.light | typeof shadows.dark;
+  borderRadius: typeof borderRadius;
+  transitions: typeof transitions;
+  zIndex: typeof zIndex;
+  animations: typeof animations;
 }
 
 // Create theme objects
 export const lightTheme: Theme = {
   colors: colors.light,
+  spacing,
   typography,
   breakpoints,
+  shadows: shadows.light,
+  borderRadius,
+  transitions,
+  zIndex,
+  animations,
 };
 
 export const darkTheme: Theme = {
   colors: colors.dark,
+  spacing,
   typography,
   breakpoints,
+  shadows: shadows.dark,
+  borderRadius,
+  transitions,
+  zIndex,
+  animations,
 };

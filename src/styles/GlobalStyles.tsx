@@ -22,6 +22,7 @@ export const GlobalStyles = createGlobalStyle`
     line-height: ${({ theme }) => theme.typography.lineHeights.normal};
     color: ${({ theme }) => theme.colors.text.primary};
     background-color: ${({ theme }) => theme.colors.background.primary};
+    transition: background-color ${({ theme }) => `${theme.transitions.duration.normal} ${theme.transitions.easing.default}`}, color ${({ theme }) => `${theme.transitions.duration.normal} ${theme.transitions.easing.default}`};
     overflow-x: hidden;
   }
 `;

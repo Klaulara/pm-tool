@@ -57,9 +57,10 @@ export interface Task {
 interface BoardStore {
     boards: Board[];
     tasks: Task[];
+    columns: Column[];
 
     // Board actions
-    addBoard: (board: Omit<Board, 'id' | 'lastUpdated' | 'tasksCount'>) => void;
+    addBoard: (board: Omit<Board, 'id' | 'lastUpdated'>) => void;
     updateBoard: (id: string, board: Partial<Board>) => void;
     deleteBoard: (id: string) => void;
     toggleStarBoard: (id: string) => void;
@@ -70,10 +71,22 @@ interface BoardStore {
     deleteTask: (id: string) => void;
     moveTask: (taskId: string, newStatus: Task['status']) => void;
 
+    // Column actions
+    addColumn: (columnData: Omit<Column, 'id' | 'order'>) => void;
+    updateColumn: (id: string, columnData: Partial<Column>) => void;
+    deleteColumn: (id: string) => void;
+    reorderColumns: (boardId: string, columnIds: string[]) => void;
+
+    // SubTask actions
+    addSubTask: (taskId: string, title: string) => void;
+    toggleSubTask: (taskId: string, subTaskId: string) => void;
+    deleteSubTask: (taskId: string, subTaskId: string) => void;
+
     // Getters
     getBoardById: (id: string) => Board | undefined;
     getTasksByBoard: (boardId: string) => Task[];
     getTasksByStatus: (boardId: string, status: Task['status']) => Task[];
+    getColumnsByBoard: (boardId: string) => Column[];
 }
 
 // Initial data
@@ -173,69 +186,318 @@ const initialColumns: Column[] = [
 ];
 
 export const useBoardStore = create<BoardStore>()(
-    persist(
-        (set, get) => ({
-            boards: initialBoards,
-            tasks: initialTasks,
-            columns: initialColumns,
+  persist(
+    (set, get) => ({
+      // Initial state
+      boards: initialBoards,
+      tasks: initialTasks,
+      columns: initialColumns,
 
-            // Board actions
-            addBoard: (board) => {
-                const newBoard: Board = {
-                    id: (Math.random() * 100000).toFixed(0),
-                    lastUpdated: new Date().toISOString(),
-                    tasksCount: { total: 0, completed: 0, inProgress: 0 },
-                    ...board,
-                };
-                set((state) => ({ boards: [...state.boards, newBoard] }));
-            },
-            updateBoard: (id, board) => {
-                set((state) => ({
-                    boards: state.boards.map((b) => (b.id === id ? { ...b, ...board, lastUpdated: new Date().toISOString() } : b)),
-                }));
-            },
-            deleteBoard: (id) => {
-                set((state) => ({ boards: state.boards.filter((b) => b.id !== id) }));
-            },
-            toggleStarBoard: (id) => {
-                set((state) => ({
-                    boards: state.boards.map((b) => (b.id === id ? { ...b, isStarred: !b.isStarred } : b)),
-                }));
-            },  
-            // Task actions
-            addTask: (task) => {
-                const newTask: Task = { 
-                    id: (Math.random() * 100000).toFixed(0),
-                    ...task 
-                };
-                set((state) => ({ tasks: [...state.tasks, newTask] }));
-            },
-            updateTask: (id, task) => {
-                set((state) => ({
-                    tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...task, updatedAt: new Date().toISOString() } : t)),
-                }));
-            },
-            deleteTask: (id) => {
-                set((state) => ({ tasks: state.tasks.filter((t) => t.id !== id) }));
-            },
-            moveTask: (taskId, newStatus) => {
-                set((state) => ({
-                    tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t)),
-                }));
-            },
-            // Getters
-            getBoardById: (id) => {
-                return get().boards.find((b) => b.id === id);
-            },
-            getTasksByBoard: (boardId) => {
-                return get().tasks.filter((t) => t.boardId === boardId);
-            },
-            getTasksByStatus: (boardId, status) => {
-                return get().tasks.filter((t) => t.boardId === boardId && t.status === status);
-            }
-        }),
-        {
-            name: 'board-store', // name of the item in the storage
+      // Board actions
+      addBoard: (boardData) => {
+        const newBoard: Board = {
+          ...boardData,
+          id: Date.now().toString(),
+          lastUpdated: new Date().toISOString().split('T')[0],
+          tasksCount: {
+            total: 0,
+            completed: 0,
+            inProgress: 0,
+          },
+        };
+        
+        // Crear las 3 columnas fijas por defecto para el nuevo board
+        const defaultColumns: Column[] = [
+          {
+            id: `col-${newBoard.id}-todo`,
+            title: 'Por Hacer',
+            status: 'todo',
+            color: '#3B82F6',
+            order: 0,
+            isFixed: true,
+            boardId: newBoard.id,
+          },
+          {
+            id: `col-${newBoard.id}-inProgress`,
+            title: 'En Progreso',
+            status: 'inProgress',
+            color: '#F59E0B',
+            order: 1,
+            isFixed: true,
+            boardId: newBoard.id,
+          },
+          {
+            id: `col-${newBoard.id}-done`,
+            title: 'Completado',
+            status: 'done',
+            color: '#10B981',
+            order: 2,
+            isFixed: true,
+            boardId: newBoard.id,
+          },
+        ];
+        
+        set((state) => ({
+          boards: [...state.boards, newBoard],
+          columns: [...state.columns, ...defaultColumns],
+        }));
+      },
+
+      updateBoard: (id, boardData) => {
+        set((state) => ({
+          boards: state.boards.map((board) =>
+            board.id === id
+              ? {
+                  ...board,
+                  ...boardData,
+                  lastUpdated: new Date().toISOString().split('T')[0],
+                }
+              : board
+          ),
+        }));
+      },
+
+      deleteBoard: (id) => {
+        set((state) => ({
+          boards: state.boards.filter((board) => board.id !== id),
+          tasks: state.tasks.filter((task) => task.boardId !== id),
+        }));
+      },
+
+      toggleStarBoard: (id) => {
+        set((state) => ({
+          boards: state.boards.map((board) =>
+            board.id === id ? { ...board, isStarred: !board.isStarred } : board
+          ),
+        }));
+      },
+
+      // Task actions
+      addTask: (taskData) => {
+        const newTask: Task = {
+          ...taskData,
+          id: Date.now().toString(),
+        };
+        
+        set((state) => {
+          const updatedTasks = [...state.tasks, newTask];
+          const board = state.boards.find((b) => b.id === taskData.boardId);
+          
+          if (board) {
+            const boardTasks = updatedTasks.filter((t) => t.boardId === taskData.boardId);
+            const updatedBoards = state.boards.map((b) =>
+              b.id === taskData.boardId
+                ? {
+                    ...b,
+                    tasksCount: {
+                      total: boardTasks.length,
+                      completed: boardTasks.filter((t) => t.status === 'done').length,
+                      inProgress: boardTasks.filter((t) => t.status === 'inProgress').length,
+                    },
+                    lastUpdated: new Date().toISOString().split('T')[0],
+                  }
+                : b
+            );
+            
+            return {
+              tasks: updatedTasks,
+              boards: updatedBoards,
+            };
+          }
+          
+          return { tasks: updatedTasks };
+        });
+      },
+
+      updateTask: (id, taskData) => {
+        set((state) => {
+          const updatedTasks = state.tasks.map((task) =>
+            task.id === id ? { ...task, ...taskData } : task
+          );
+          
+          const task = state.tasks.find((t) => t.id === id);
+          if (task) {
+            const boardTasks = updatedTasks.filter((t) => t.boardId === task.boardId);
+            const updatedBoards = state.boards.map((b) =>
+              b.id === task.boardId
+                ? {
+                    ...b,
+                    tasksCount: {
+                      total: boardTasks.length,
+                      completed: boardTasks.filter((t) => t.status === 'done').length,
+                      inProgress: boardTasks.filter((t) => t.status === 'inProgress').length,
+                    },
+                    lastUpdated: new Date().toISOString().split('T')[0],
+                  }
+                : b
+            );
+            
+            return {
+              tasks: updatedTasks,
+              boards: updatedBoards,
+            };
+          }
+          
+          return { tasks: updatedTasks };
+        });
+      },
+
+      deleteTask: (id) => {
+        set((state) => {
+          const task = state.tasks.find((t) => t.id === id);
+          const updatedTasks = state.tasks.filter((t) => t.id !== id);
+          
+          if (task) {
+            const boardTasks = updatedTasks.filter((t) => t.boardId === task.boardId);
+            const updatedBoards = state.boards.map((b) =>
+              b.id === task.boardId
+                ? {
+                    ...b,
+                    tasksCount: {
+                      total: boardTasks.length,
+                      completed: boardTasks.filter((t) => t.status === 'done').length,
+                      inProgress: boardTasks.filter((t) => t.status === 'inProgress').length,
+                    },
+                    lastUpdated: new Date().toISOString().split('T')[0],
+                  }
+                : b
+            );
+            
+            return {
+              tasks: updatedTasks,
+              boards: updatedBoards,
+            };
+          }
+          
+          return { tasks: updatedTasks };
+        });
+      },
+
+      moveTask: (taskId, newStatus) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { ...task, status: newStatus, updatedAt: new Date().toISOString() }
+              : task
+          ),
+        }));
+      },
+
+      // Column actions
+      addColumn: (columnData) => {
+        const boardColumns = get().columns.filter((col) => col.boardId === columnData.boardId);
+        const newColumn: Column = {
+          ...columnData,
+          id: `col-${Date.now()}`,
+          order: boardColumns.length, // Agregar al final
+        };
+        set((state) => ({
+          columns: [...state.columns, newColumn],
+        }));
+      },
+
+      updateColumn: (id, columnData) => {
+        set((state) => ({
+          columns: state.columns.map((col) =>
+            col.id === id ? { ...col, ...columnData } : col
+          ),
+        }));
+      },
+
+      deleteColumn: (id) => {
+        const column = get().columns.find((col) => col.id === id);
+        
+        // No permitir eliminar columnas fijas
+        if (column?.isFixed) {
+          console.warn('No se pueden eliminar columnas fijas');
+          return;
         }
-    )
+        
+        set((state) => ({
+          columns: state.columns.filter((col) => col.id !== id),
+          // Mover tareas de esta columna a 'todo' por defecto
+          tasks: state.tasks.map((task) =>
+            task.status === column?.status ? { ...task, status: 'todo' } : task
+          ),
+        }));
+      },
+
+      reorderColumns: (boardId, columnIds) => {
+        set((state) => ({
+          columns: state.columns.map((col) => {
+            if (col.boardId !== boardId) return col;
+            const newOrder = columnIds.indexOf(col.id);
+            return newOrder >= 0 ? { ...col, order: newOrder } : col;
+          }),
+        }));
+      },
+
+      // SubTask actions
+      addSubTask: (taskId, title) => {
+        const newSubTask: SubTask = {
+          id: `sub-${Date.now()}`,
+          title,
+          completed: false,
+          createdAt: new Date().toISOString().split('T')[0],
+        };
+        
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { ...task, subTasks: [...task.subTasks, newSubTask] }
+              : task
+          ),
+        }));
+      },
+
+      toggleSubTask: (taskId, subTaskId) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  subTasks: task.subTasks.map((sub) =>
+                    sub.id === subTaskId ? { ...sub, completed: !sub.completed } : sub
+                  ),
+                }
+              : task
+          ),
+        }));
+      },
+
+      deleteSubTask: (taskId, subTaskId) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { ...task, subTasks: task.subTasks.filter((sub) => sub.id !== subTaskId) }
+              : task
+          ),
+        }));
+      },
+
+      // Getters
+      getBoardById: (id) => {
+        return get().boards.find((board) => board.id === id);
+      },
+
+      getTasksByBoard: (boardId) => {
+        return get().tasks.filter((task) => task.boardId === boardId);
+      },
+
+      getTasksByStatus: (boardId, status) => {
+        return get().tasks.filter(
+          (task) => task.boardId === boardId && task.status === status
+        );
+      },
+
+      getColumnsByBoard: (boardId) => {
+        return get().columns
+          .filter((col) => col.boardId === boardId)
+          .sort((a, b) => a.order - b.order);
+      },
+    }),
+    {
+      name: 'board-store', // nombre del item en el almacenamiento
+    }
+  )
 );

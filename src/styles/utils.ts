@@ -31,3 +31,19 @@ export const media = {
     }
   `) as MediaQueryFunction,
 };
+
+// Utility for flexbox centering
+export const flexCenter = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+// Utility for focus visible styles
+export const focusVisible = css`
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.border.focus};
+    outline-offset: 2px;
+    border-radius: ${({ theme }) => theme.borderRadius.sm};
+  }
+`;
