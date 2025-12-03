@@ -1,85 +1,11 @@
 'use client';
 
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 interface BadgeProps {
-  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info';
+  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | 'urgent';
   size?: 'sm' | 'md' | 'lg';
 }
-
-const badgeVariants = {
-  default: `
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    --bg: ${({ theme }: { theme: DefaultTheme }) => theme.colors.neutral[100]};
-    --text: ${({ theme }: { theme: DefaultTheme }) => theme.colors.text.primary};
-    --border: ${({ theme }: { theme: DefaultTheme }) => theme.colors.border.main};
-  `,
-  primary: `
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    --bg: ${({ theme }: { theme: DefaultTheme }) => theme.colors.primary.main}20;
-    --text: ${({ theme }: { theme: DefaultTheme }) => theme.colors.primary.dark};
-    --border: ${({ theme }: { theme: DefaultTheme }) => theme.colors.primary.main};
-  `,
-  secondary: `
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    --bg: ${({ theme }: { theme: DefaultTheme }) => theme.colors.secondary.main}20;
-    --text: ${({ theme }: { theme: DefaultTheme }) => theme.colors.secondary.dark};
-    --border: ${({ theme }: { theme: DefaultTheme }) => theme.colors.secondary.main};
-  `,
-  success: `
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    --bg: ${({ theme }: { theme: DefaultTheme }) => theme.colors.success.bg};
-    --text: ${({ theme }: { theme: DefaultTheme }) => theme.colors.success.dark};
-    --border: ${({ theme }: { theme: DefaultTheme }) => theme.colors.success.main};
-  `,
-  error: `
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    --bg: ${({ theme }: { theme: DefaultTheme }) => theme.colors.error.bg};
-    --text: ${({ theme }: { theme: DefaultTheme }) => theme.colors.error.dark};
-    --border: ${({ theme }: { theme: DefaultTheme }) => theme.colors.error.main};
-  `,
-  warning: `
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    --bg: ${({ theme }: { theme: DefaultTheme }) => theme.colors.warning.bg};
-    --text: ${({ theme }: { theme: DefaultTheme }) => theme.colors.warning.dark};
-    --border: ${({ theme }: { theme: DefaultTheme }) => theme.colors.warning.main};
-  `,
-  info: `
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    --bg: ${({ theme }: { theme: DefaultTheme }) => theme.colors.info.bg};
-    --text: ${({ theme }: { theme: DefaultTheme }) => theme.colors.info.dark};
-    --border: ${({ theme }: { theme: DefaultTheme }) => theme.colors.info.main};
-  `,
-};
-
-const badgeSizes = {
-  sm: `
-    padding: 2px 8px;
-    font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.fontSizes.xs};
-  `,
-  md: `
-    padding: 4px 12px;
-    font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.fontSizes.sm};
-  `,
-  lg: `
-    padding: 6px 16px;
-    font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.fontSizes.md};
-  `,
-};
 
 export const Badge = styled.span<BadgeProps>`
   display: inline-flex;
@@ -88,11 +14,81 @@ export const Badge = styled.span<BadgeProps>`
   font-weight: ${({ theme }) => theme.typography.fontWeights.medium};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   white-space: nowrap;
-  transition: all ${({ theme }) => theme.transitions.duration.fast}
-    ${({ theme }) => theme.transitions.easing.default}
+  transition: all ${({ theme }) => theme.transitions.duration.fast} ${({ theme }) => theme.transitions.easing.default};
 
-  ${({ variant = 'default' }) => badgeVariants[variant]}
-  ${({ size = 'md' }) => badgeSizes[size]}
+  ${({ size = 'md', theme }) => {
+    switch (size) {
+      case 'sm':
+        return `
+          padding: 2px 8px;
+          font-size: ${theme.typography.fontSizes.xs};
+        `;
+      case 'lg':
+        return `
+          padding: 6px 16px;
+          font-size: ${theme.typography.fontSizes.md};
+        `;
+      default:
+        return `
+          padding: 4px 12px;
+          font-size: ${theme.typography.fontSizes.sm};
+        `;
+    }
+  }}
+
+  ${({ variant = 'default', theme }) => {
+    switch (variant) {
+      case 'urgent':
+        return `
+          background-color: ${theme.colors.error.main};
+          color: #FFFFFF;
+          border: 1px solid ${theme.colors.error.dark};
+          font-weight: ${theme.typography.fontWeights.bold};
+        `;
+      case 'error':
+        return `
+          background-color: ${theme.colors.error.bg};
+          color: ${theme.colors.error.dark};
+          border: 1px solid ${theme.colors.error.main};
+        `;
+      case 'primary':
+        return `
+          background-color: ${theme.colors.primary.main}20;
+          color: ${theme.colors.primary.dark};
+          border: 1px solid ${theme.colors.primary.main};
+        `;
+      case 'secondary':
+        return `
+          background-color: ${theme.colors.secondary.main}20;
+          color: ${theme.colors.secondary.dark};
+          border: 1px solid ${theme.colors.secondary.main};
+        `;
+      case 'success':
+        return `
+          background-color: ${theme.colors.success.bg};
+          color: ${theme.colors.success.dark};
+          border: 1px solid ${theme.colors.success.main};
+        `;
+      case 'warning':
+        return `
+          background-color: ${theme.colors.warning.bg};
+          color: ${theme.colors.warning.dark};
+          border: 1px solid ${theme.colors.warning.main};
+        `;
+      case 'info':
+        return `
+          background-color: ${theme.colors.info.bg};
+          color: ${theme.colors.info.dark};
+          border: 1px solid ${theme.colors.info.main};
+        `;
+      default:
+        return `
+          background-color: ${theme.colors.neutral[100]};
+          color: ${theme.colors.text.primary};
+          border: 1px solid ${theme.colors.border.main};
+        `;
+    }
+  }}
 `;
 
 export const TaskStatusBadge = styled(Badge)<{ status: 'todo' | 'inProgress' | 'review' | 'done' | 'blocked' }>`

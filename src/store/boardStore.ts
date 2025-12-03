@@ -58,6 +58,7 @@ interface BoardStore {
     boards: Board[];
     tasks: Task[];
     columns: Column[];
+    tags: Tags[];
 
     // Board actions
     addBoard: (board: Omit<Board, 'id' | 'lastUpdated'>) => void;
@@ -95,7 +96,7 @@ const initialBoards: Board[] = [
         id: '1',
         name: 'Desarrollo Task Manager System',
         description: 'Frontend para sistema de gestion de tareas',
-        tasksCount: { total: 12, completed: 5, inProgress: 4 },
+        tasksCount: { total: 4, completed: 1, inProgress: 1 },
         lastUpdated: new Date().toISOString(),
         isStarred: true,
     }
@@ -118,7 +119,7 @@ const initialTasks: Task[] = [
         title: 'Diseñar interfaz de usuario',
         description: 'Crear wireframes y mockups para la aplicacion',
         priority: 'medium',
-        status: 'in-progress',
+        status: 'inProgress',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         subTasks: [],
@@ -153,6 +154,17 @@ const initialTasks: Task[] = [
             }
         ],
         boardId: '1',
+    },
+    {
+        id: 'task-4',
+        title: 'Escribir documentacion',
+        description: 'Crear documentacion para el uso y desarrollo del proyecto',
+        priority: 'urgent',
+        status: 'todo',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        subTasks: [],
+        boardId: '1',
     }
 ];
 const initialColumns: Column[] = [
@@ -163,16 +175,16 @@ const initialColumns: Column[] = [
         color: '#FF5733',
         order: 1,
         isFixed: true,
-        boardId: 'board-1',
+        boardId: '1',
     },
     {
         id: 'col-2',
         title: 'In Progress',
-        status: 'in-progress',
+        status: 'inProgress',
         color: '#33C3FF',
         order: 2,
         isFixed: false,
-        boardId: 'board-1',
+        boardId: '1',
     },
     {
         id: 'col-3',
@@ -181,7 +193,7 @@ const initialColumns: Column[] = [
         color: '#28A745',
         order: 3,
         isFixed: false,
-        boardId: 'board-1',
+        boardId: '1',
     }
 ];
 
@@ -192,12 +204,18 @@ export const useBoardStore = create<BoardStore>()(
       boards: initialBoards,
       tasks: initialTasks,
       columns: initialColumns,
+      tags: [],
 
       // Board actions
       addBoard: (boardData) => {
+        const currentBoards = get().boards;
+        const numericIds = currentBoards
+          .map((b) => parseInt(b.id, 10))
+          .filter((n) => !Number.isNaN(n));
+        const nextId = (numericIds.length ? Math.max(...numericIds) + 1 : 1).toString();
         const newBoard: Board = {
           ...boardData,
-          id: Date.now().toString(),
+          id: nextId,
           lastUpdated: new Date().toISOString().split('T')[0],
           tasksCount: {
             total: 0,

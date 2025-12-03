@@ -28,17 +28,15 @@ const CreateText = styled.p`
 `;
 
 interface CreateBoardProps {
-    setIsCreateModalOpen: (isOpen: boolean) => void;
+  setIsCreateModalOpen: (isOpen: boolean) => void;
 }
 
 const CreateBoard = ({ setIsCreateModalOpen }: CreateBoardProps) => {
-    return (
-        <>
-            <CreateBoardCard onClick={() => setIsCreateModalOpen(true)}>
-                <CreateText>Crear Nuevo Tablero</CreateText>
-            </CreateBoardCard>
-        </>
-    )
+  return (
+    <CreateBoardCard onClick={() => setIsCreateModalOpen(true)}>
+      <CreateText>Create New Board</CreateText>
+    </CreateBoardCard>
+  )
 }
 
 export default CreateBoard
