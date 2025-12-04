@@ -21,22 +21,21 @@ import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-
 import { Container } from '@/components/ui';
 import CreateTaskModal from '../../../components/modals/CreateTaskModal';
 import BoardConfigurationModal from '../../../components/modals/BoardConfigurationModal';
+import AddColumnButton from '@/components/AddColumnButton';
+import CreateColumnModal from '@/components/modals/CreateColumnModal';
 
 // Styled Components
 const BoardMain = styled.main`
   padding: ${({ theme }) => theme.spacing.xl} 0;
   min-height: calc(100vh - 120px);
   background-color: ${({ theme }) => theme.colors.background.secondary};
-`;
-
-const KanbanContainer = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.lg};
   overflow-x: auto;
-  padding-bottom: ${({ theme }) => theme.spacing.md};
+  overflow-y: hidden;
+  scroll-behavior: smooth;
   
   &::-webkit-scrollbar {
-    height: 8px;
+    height: 12px;
   }
   
   &::-webkit-scrollbar-track {
@@ -52,6 +51,12 @@ const KanbanContainer = styled.div`
       background: ${({ theme }) => theme.colors.neutral[500]};
     }
   }
+`;
+
+const KanbanContainer = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.lg};
+  padding-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
 // Types
@@ -97,6 +102,9 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
     const [boardConfigurationModalOpen, setBoardConfigurationModalOpen] = useState(false);
     const [newBoardName, setNewBoardName] = useState('');
     const [newBoardDescription, setNewBoardDescription] = useState('');
+    const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
+    const [newColumnName, setNewColumnName] = useState('');
+    const [newColumnColor, setNewColumnColor] = useState('#000000');
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -108,7 +116,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
 
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
-        
+
         // Check if dragging a task
         const task = tasks.find((t) => t.id === active.id);
         if (task) {
@@ -126,7 +134,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
 
         // Check if we're dragging a task
         const activeTask = tasks.find((t) => t.id === activeId);
-        
+
         if (activeTask) {
             // Find source column
             const activeColumn = columns.find((col) =>
@@ -154,7 +162,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        
+
         setActiveTask(null);
 
         if (!over) return;
@@ -175,7 +183,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
 
     const handleCreateTask = () => {
         if (!newTaskName.trim()) return;
-        
+
         // Ajustar la fecha para evitar problemas de zona horaria
         let adjustedDueDate = newTaskDueDate;
         if (newTaskDueDate) {
@@ -185,7 +193,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
             date.setMinutes(date.getMinutes() + offset);
             adjustedDueDate = date.toISOString();
         }
-        
+
         useBoardStore.getState().addTask({
             boardId: boardId,
             title: newTaskName,
@@ -220,6 +228,20 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
         setNewBoardDescription('');
     };
 
+    const handleColumnCreate = () => {
+        if (!newColumnName.trim()) return;
+        useBoardStore.getState().addColumn({
+            boardId: boardId,
+            title: newColumnName,
+            color: newColumnColor,
+            status: newColumnName.toLowerCase().replace(/\s+/g, '-'),
+            isFixed: false,
+        });
+        setIsCreateModalOpen(false);
+        setNewColumnName('');
+        setNewColumnColor('');
+    };  
+
     return (
         <>
             <DndContext
@@ -229,10 +251,10 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
-                <HeaderBoards 
-                    board={board} 
-                    setIsCreateModalOpen={() => handleOpenCreateModal()} 
-                    setBoardConfigurationModalOpen={setBoardConfigurationModalOpen} 
+                <HeaderBoards
+                    board={board}
+                    setIsCreateModalOpen={() => handleOpenCreateModal()}
+                    setBoardConfigurationModalOpen={setBoardConfigurationModalOpen}
                 />
 
                 <BoardMain>
@@ -252,6 +274,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                                         onAddTask={() => handleOpenCreateModal(column.status)}
                                     />
                                 ))}
+                                <AddColumnButton onAddColumn={() => setIsCreateColumnModalOpen(true)} />
                             </KanbanContainer>
                         </SortableContext>
                     </Container>
@@ -287,6 +310,18 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                     newBoardDescription={newBoardDescription}
                     setNewBoardDescription={setNewBoardDescription}
                     handleEditBoard={handleEditBoard}
+                />
+            )}
+
+            {isCreateColumnModalOpen && (
+                <CreateColumnModal
+                    isCreateModalOpen={isCreateColumnModalOpen}
+                    setIsCreateModalOpen={setIsCreateColumnModalOpen}
+                    newColumnName={newColumnName}
+                    setNewColumnName={setNewColumnName}
+                    newColumnColor={newColumnColor}
+                    setNewColumnColor={setNewColumnColor}
+                    handleColumnCreate={handleColumnCreate}
                 />
             )}
         </>

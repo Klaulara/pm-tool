@@ -17,7 +17,7 @@ const KanbanColumnContainer = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-const ColumnHeader = styled.div`
+const ColumnHeader = styled.div<{ $isDraggable?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -26,10 +26,10 @@ const ColumnHeader = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   box-shadow: ${({ theme }) => theme.shadows.sm};
   border-top: 3px solid var(--column-color);
-  cursor: grab;
+  cursor: ${({ $isDraggable }) => $isDraggable ? 'grab' : 'default'};
   
   &:active {
-    cursor: grabbing;
+    cursor: ${({ $isDraggable }) => $isDraggable ? 'grabbing' : 'default'};
   }
 `;
 
@@ -143,7 +143,7 @@ export function KanbanColumn({ id, title, color, tasks, onAddTask }: KanbanColum
   return (
     <div ref={setNodeRef} style={style}>
       <KanbanColumnContainer style={{ '--column-color': color } as React.CSSProperties}>
-        <ColumnHeader {...attributes} {...listeners}>
+        <ColumnHeader $isDraggable={true} {...attributes} {...listeners}>
           <ColumnTitle>
             {title}
             <TaskCount>{tasks.length}</TaskCount>
