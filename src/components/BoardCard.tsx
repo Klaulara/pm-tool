@@ -115,7 +115,7 @@ const BoardCardComponent = ({ board, handleBoardClick, getCompletionPercentage }
                             style={{
                                 height: '100%',
                                 width: `${getCompletionPercentage(board)}%`,
-                                // background: `linear-gradient(90deg, ${board.color}, ${board.color}dd)`,
+                                background: 'linear-gradient(90deg, #3B82F6, #3B82F6dd)',
                                 transition: 'width 0.3s ease',
                                 borderRadius: '999px',
                             }}

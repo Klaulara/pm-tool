@@ -83,6 +83,12 @@ interface BoardStore {
     toggleSubTask: (taskId: string, subTaskId: string) => void;
     deleteSubTask: (taskId: string, subTaskId: string) => void;
 
+    // Tag actions
+    addTag: (tag: Omit<Tags, 'id'>) => void;
+    updateTag: (id: string, tag: Partial<Tags>) => void;
+    deleteTag: (id: string) => void;
+    getTagById: (id: string) => Tags | undefined;
+
     // Getters
     getBoardById: (id: string) => Board | undefined;
     getTasksByBoard: (boardId: string) => Task[];
@@ -491,6 +497,40 @@ export const useBoardStore = create<BoardStore>()(
               : task
           ),
         }));
+      },
+
+      // Tag actions
+      addTag: (tagData) => {
+        const newTag: Tags = {
+          ...tagData,
+          id: `tag-${Date.now()}`,
+        };
+        set((state) => ({
+          tags: [...state.tags, newTag],
+        }));
+      },
+
+      updateTag: (id, tagData) => {
+        set((state) => ({
+          tags: state.tags.map((tag) =>
+            tag.id === id ? { ...tag, ...tagData } : tag
+          ),
+        }));
+      },
+
+      deleteTag: (id) => {
+        set((state) => ({
+          tags: state.tags.filter((tag) => tag.id !== id),
+          // Remover el tag de todas las tareas que lo tengan
+          tasks: state.tasks.map((task) => ({
+            ...task,
+            tags: task.tags?.filter((tag) => tag.id !== id) || [],
+          })),
+        }));
+      },
+
+      getTagById: (id) => {
+        return get().tags.find((tag) => tag.id === id);
       },
 
       // Getters

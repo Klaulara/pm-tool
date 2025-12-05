@@ -141,6 +141,44 @@ const AddTagSection = styled.div`
   align-items: flex-end;
 `;
 
+const AvailableTagsSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
+
+const AvailableTagsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
+
+const AvailableTagChip = styled.button<{ $color: string }>`
+  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+  background-color: ${({ $color }) => $color};
+  color: ${({ theme }) => theme.colors.text.primary};
+  border: 1px solid ${({ theme }) => theme.colors.border.light};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  font-size: ${({ theme }) => theme.typography.fontSizes.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: ${({ theme }) => theme.shadows.sm};
+  }
+`;
+
+const EmptyTagsMessage = styled.p`
+  font-size: ${({ theme }) => theme.typography.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing.md};
+  background-color: ${({ theme }) => theme.colors.background.secondary};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  margin: 0;
+`;
+
 const ColorPickerContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -224,8 +262,6 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ isOpen, onClose, ta
   const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write');
   
   // Tags state
-  const [newTagName, setNewTagName] = useState('');
-  const [newTagColor, setNewTagColor] = useState('#3b82f6');
   const [selectedTags, setSelectedTags] = useState<Tags[]>(task.tags || []);
   
   // SubTasks state
@@ -235,6 +271,12 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ isOpen, onClose, ta
   const addSubTask = useBoardStore((state) => state.addSubTask);
   const toggleSubTask = useBoardStore((state) => state.toggleSubTask);
   const deleteSubTask = useBoardStore((state) => state.deleteSubTask);
+  const allTags = useBoardStore((state) => state.tags);
+  
+  // Get available tags (not already selected)
+  const availableTags = allTags.filter(
+    (tag) => !selectedTags.some((selectedTag) => selectedTag.id === tag.id)
+  );
 
   const handleSave = () => {
     let adjustedDueDate = editedDueDate;
@@ -257,18 +299,8 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ isOpen, onClose, ta
     onClose();
   };
 
-  const handleAddTag = () => {
-    if (!newTagName.trim()) return;
-    
-    const newTag: Tags = {
-      id: `tag-${Date.now()}`,
-      name: newTagName,
-      color: newTagColor,
-    };
-    
-    setSelectedTags([...selectedTags, newTag]);
-    setNewTagName('');
-    setNewTagColor('#3b82f6');
+  const handleAddTag = (tag: Tags) => {
+    setSelectedTags([...selectedTags, tag]);
   };
 
   const handleRemoveTag = (tagId: string) => {
@@ -390,34 +422,26 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ isOpen, onClose, ta
               </TagsList>
             )}
             
-            <AddTagSection>
-              <FormGroup style={{ flex: 1, margin: 0 }}>
-                <Input
-                  type="text"
-                  value={newTagName}
-                  onChange={(e) => setNewTagName(e.target.value)}
-                  placeholder="New tag name"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddTag();
-                    }
-                  }}
-                />
-              </FormGroup>
-              
-              <ColorPickerContainer>
-                <ColorPicker
-                  type="color"
-                  value={newTagColor}
-                  onChange={(e) => setNewTagColor(e.target.value)}
-                />
-              </ColorPickerContainer>
-              
-              <Button variant="outline" onClick={handleAddTag}>
-                Add Tag
-              </Button>
-            </AddTagSection>
+            {availableTags.length > 0 ? (
+              <AvailableTagsSection>
+                <Label style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>Tags Disponibles</Label>
+                <AvailableTagsList>
+                  {availableTags.map((tag) => (
+                    <AvailableTagChip
+                      key={tag.id}
+                      $color={tag.color}
+                      onClick={() => handleAddTag(tag)}
+                    >
+                      {tag.name}
+                    </AvailableTagChip>
+                  ))}
+                </AvailableTagsList>
+              </AvailableTagsSection>
+            ) : (
+              <EmptyTagsMessage>
+                No hay más tags disponibles. Crea nuevos tags desde el menú del tablero.
+              </EmptyTagsMessage>
+            )}
           </TagsSection>
 
           <SubTasksSection>

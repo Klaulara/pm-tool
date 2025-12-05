@@ -105,6 +105,18 @@ const TagList = styled.div`
   flex-wrap: wrap;
 `;
 
+const TagBadge = styled.span<{ $color?: string }>`
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: ${({ $color }) => $color || '#e5e7eb'};
+  color: ${({ theme }) => theme.colors.text.primary};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  font-size: ${({ theme }) => theme.typography.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.typography.fontWeights.medium};
+  line-height: 1;
+`;
+
 // Component Props
 interface SortableTaskCardProps {
   task: Task;
@@ -159,10 +171,10 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
 
           {task.tags && task.tags.length > 0 && (
             <TagList>
-              {task.tags.map((tag, index) => (
-                <Badge key={index} variant="default" size="sm">
+              {task.tags.map((tag) => (
+                <TagBadge key={tag.id} $color={tag.color}>
                   {tag.name}
-                </Badge>
+                </TagBadge>
               ))}
             </TagList>
           )}
@@ -214,10 +226,10 @@ export function TaskCardOverlay({ task }: TaskCardOverlayProps) {
 
       {task.tags && task.tags.length > 0 && (
         <TagList>
-          {task.tags.map((tag, index) => (
-            <Badge key={index} variant="default" size="sm">
+          {task.tags.map((tag) => (
+            <TagBadge key={tag.id} $color={tag.color}>
               {tag.name}
-            </Badge>
+            </TagBadge>
           ))}
         </TagList>
       )}

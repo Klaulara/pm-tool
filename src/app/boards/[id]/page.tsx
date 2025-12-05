@@ -21,6 +21,8 @@ import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-
 import { Container } from '@/components/ui';
 import CreateTaskModal from '../../../components/modals/CreateTaskModal';
 import BoardConfigurationModal from '../../../components/modals/BoardConfigurationModal';
+import { ManageTagsModal } from '@/components/modals/ManageTagsModal';
+import { DeleteBoardModal } from '@/components/modals/DeleteBoardModal';
 import AddColumnButton from '@/components/AddColumnButton';
 import CreateColumnModal from '@/components/modals/CreateColumnModal';
 
@@ -66,6 +68,7 @@ interface Column {
     status: 'todo' | 'inProgress' | 'review' | 'done';
     color: string;
     tasks: Task[];
+    isFixed: boolean;
 }
 
 export default function BoardPage({ params }: { params: Promise<{ id: string }> }) {
@@ -74,8 +77,11 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
     // Get data from Zustand store - subscribe to changes
     const allTasks = useBoardStore((state) => state.tasks);
     const allColumns = useBoardStore((state) => state.columns);
+    const allTags = useBoardStore((state) => state.tags);
     const moveTask = useBoardStore((state) => state.moveTask);
     const reorderColumns = useBoardStore((state) => state.reorderColumns);
+    const updateColumn = useBoardStore((state) => state.updateColumn);
+    const deleteColumn = useBoardStore((state) => state.deleteColumn);
     const board = useBoardStore((state) => state.getBoardById(boardId));
 
     // Filter and sort data for this board
@@ -90,6 +96,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
         status: col.status as 'todo' | 'inProgress' | 'review' | 'done',
         color: col.color,
         tasks: tasks.filter((task) => task.status === col.status),
+        isFixed: col.isFixed,
     }));
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -98,6 +105,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
     const [newTaskDescription, setNewTaskDescription] = useState('');
     const [newTaskPriority, setNewTaskPriority] = useState<'medium' | 'low' | 'high' | 'urgent'>('low');
     const [newTaskDueDate, setNewTaskDueDate] = useState<string>('');
+    const [selectedTags, setSelectedTags] = useState<typeof allTags>([]);
     const [activeTask, setActiveTask] = useState<Task | null>(null);
     const [boardConfigurationModalOpen, setBoardConfigurationModalOpen] = useState(false);
     const [newBoardName, setNewBoardName] = useState('');
@@ -105,6 +113,8 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
     const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
     const [newColumnName, setNewColumnName] = useState('');
     const [newColumnColor, setNewColumnColor] = useState('#000000');
+    const [isManageTagsModalOpen, setIsManageTagsModalOpen] = useState(false);
+    const [isDeleteBoardModalOpen, setIsDeleteBoardModalOpen] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -181,7 +191,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
         }
     };
 
-    const handleCreateTask = () => {
+    const handleCreateTask = (createAnother: boolean = false) => {
         if (!newTaskName.trim()) return;
 
         // Ajustar la fecha para evitar problemas de zona horaria
@@ -201,15 +211,23 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
             status: selectedColumnStatus,
             dueDate: adjustedDueDate,
             priority: newTaskPriority,
+            tags: selectedTags,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             subTasks: [],
         });
-        setIsCreateModalOpen(false);
+        
+        // Reset form
         setNewTaskName('');
         setNewTaskDescription('');
         setNewTaskPriority('low');
         setNewTaskDueDate('');
+        setSelectedTags([]);
+        
+        // Close modal only if not creating another
+        if (!createAnother) {
+            setIsCreateModalOpen(false);
+        }
     };
 
     const handleOpenCreateModal = (columnStatus?: 'todo' | 'inProgress' | 'review' | 'done') => {
@@ -237,9 +255,17 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
             status: newColumnName.toLowerCase().replace(/\s+/g, '-'),
             isFixed: false,
         });
-        setIsCreateModalOpen(false);
+        setIsCreateColumnModalOpen(false);
         setNewColumnName('');
         setNewColumnColor('');
+    };
+
+    const handleEditColumn = (columnId: string, newTitle: string) => {
+        updateColumn(columnId, { title: newTitle });
+    };
+
+    const handleDeleteColumn = (columnId: string) => {
+        deleteColumn(columnId);
     };  
 
     return (
@@ -255,6 +281,8 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                     board={board}
                     setIsCreateModalOpen={() => handleOpenCreateModal()}
                     setBoardConfigurationModalOpen={setBoardConfigurationModalOpen}
+                    setIsManageTagsModalOpen={setIsManageTagsModalOpen}
+                    setIsDeleteBoardModalOpen={setIsDeleteBoardModalOpen}
                 />
 
                 <BoardMain>
@@ -271,7 +299,10 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                                         title={column.title}
                                         color={column.color}
                                         tasks={column.tasks}
+                                        isFixed={column.isFixed}
                                         onAddTask={() => handleOpenCreateModal(column.status)}
+                                        onEditColumn={handleEditColumn}
+                                        onDeleteColumn={handleDeleteColumn}
                                     />
                                 ))}
                                 <AddColumnButton onAddColumn={() => setIsCreateColumnModalOpen(true)} />
@@ -297,6 +328,9 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                     setNewTaskPriority={(priority) => setNewTaskPriority(priority as 'medium' | 'low' | 'high' | 'urgent')}
                     newTaskDueDate={newTaskDueDate}
                     setNewTaskDueDate={setNewTaskDueDate}
+                    selectedTags={selectedTags}
+                    setSelectedTags={setSelectedTags}
+                    availableTags={allTags}
                     handleCreateTask={handleCreateTask}
                 />
             )}
@@ -322,6 +356,22 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                     newColumnColor={newColumnColor}
                     setNewColumnColor={setNewColumnColor}
                     handleColumnCreate={handleColumnCreate}
+                />
+            )}
+
+            {isManageTagsModalOpen && (
+                <ManageTagsModal
+                    isOpen={isManageTagsModalOpen}
+                    onClose={() => setIsManageTagsModalOpen(false)}
+                />
+            )}
+
+            {isDeleteBoardModalOpen && board && (
+                <DeleteBoardModal
+                    isOpen={isDeleteBoardModalOpen}
+                    onClose={() => setIsDeleteBoardModalOpen(false)}
+                    boardId={boardId}
+                    boardName={board.name}
                 />
             )}
         </>
