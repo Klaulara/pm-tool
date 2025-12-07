@@ -150,7 +150,7 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
   return (
     <>
       <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        <TaskCard hoverable padding="md" onClick={handleCardClick}>
+        <TaskCard $hoverable padding="md" onClick={handleCardClick}>
           <TaskHeader>
             <div style={{ flex: 1 }}>
               <TaskTitle>{task.title}</TaskTitle>
@@ -205,7 +205,7 @@ interface TaskCardOverlayProps {
 
 export function TaskCardOverlay({ task }: TaskCardOverlayProps) {
   return (
-    <TaskCard hoverable padding="md" style={{ opacity: 0.9, cursor: 'grabbing' }}>
+    <TaskCard $hoverable padding="md" style={{ opacity: 0.9, cursor: 'grabbing' }}>
       <TaskHeader>
         <div style={{ flex: 1 }}>
           <TaskTitle>{task.title}</TaskTitle>

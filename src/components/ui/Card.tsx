@@ -5,8 +5,8 @@ import styled, { css } from 'styled-components';
 interface CardProps {
   variant?: 'default' | 'elevated' | 'outlined' | 'ghost';
   padding?: 'sm' | 'md' | 'lg';
-  hoverable?: boolean;
-  clickable?: boolean;
+  $hoverable?: boolean;
+  $clickable?: boolean;
 }
 
 const cardVariants = {
@@ -55,8 +55,8 @@ export const Card = styled.div<CardProps>`
   ${({ variant = 'default' }) => cardVariants[variant]}
   ${({ padding = 'md' }) => cardPadding[padding]}
 
-  ${({ hoverable }) =>
-    hoverable &&
+  ${({ $hoverable }) =>
+    $hoverable &&
     css`
       &:hover {
         transform: translateY(-2px);
@@ -64,8 +64,8 @@ export const Card = styled.div<CardProps>`
       }
     `}
 
-  ${({ clickable }) =>
-    clickable &&
+  ${({ $clickable }) =>
+    $clickable &&
     css`
       cursor: pointer;
 

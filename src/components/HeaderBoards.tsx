@@ -5,7 +5,7 @@ import { Container, Flex, Button } from './ui';
 import { ThemeToggle } from './ThemeToggle';
 
 const BoardHeader = styled.header`
-  padding: ${({ theme }) => theme.spacing.lg} 0;
+  padding: ${({ theme }) => theme.spacing.lg};
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
   background-color: ${({ theme }) => theme.colors.background.primary};
   position: sticky;
@@ -13,6 +13,8 @@ const BoardHeader = styled.header`
   z-index: ${({ theme }) => theme.zIndex.sticky};
   backdrop-filter: blur(8px);
   background-color: ${({ theme }) => theme.colors.background.primary}e6;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 const BoardTitle = styled.h1`
@@ -154,15 +156,14 @@ const HeaderBoards = ({
 
   return (
     <BoardHeader>
-            <Container maxWidth="full">
-                <Flex justify="between" align="center">
+                <Flex justify="between" align="center" style={{ flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
                     <BoardTitle>{board?.name || 'Tablero de Proyectos'}</BoardTitle>
                     <BoardDescription>
                       {board?.description || 'Gestiona tus tareas de forma visual y eficiente'}
                     </BoardDescription>
                   </div>
-                  <Flex gap="md" align="center">
+                  <Flex gap="md" align="center" style={{ flexShrink: 0 }}>
                     <DropdownContainer ref={dropdownRef}>
                       <DropdownButton onClick={toggleDropdown}>
                         <span>⋮</span>
@@ -186,7 +187,6 @@ const HeaderBoards = ({
                     <ThemeToggle />
                   </Flex>
                 </Flex>
-            </Container>
           </BoardHeader>
   )
 }

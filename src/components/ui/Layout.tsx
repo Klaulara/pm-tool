@@ -2,7 +2,7 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div<{ maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full' }>`
+export const Container = styled.div<{ $maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full' }>`
   width: 100%;
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.spacing.md};
@@ -11,7 +11,7 @@ export const Container = styled.div<{ maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'fu
     padding: 0 ${({ theme }) => theme.spacing.lg};
   }
 
-  max-width: ${({ maxWidth = 'xl' }) => {
+  max-width: ${({ $maxWidth = 'xl' }) => {
     const widths = {
       sm: '640px',
       md: '768px',
@@ -19,7 +19,7 @@ export const Container = styled.div<{ maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'fu
       xl: '1280px',
       full: '100%',
     };
-    return widths[maxWidth];
+    return widths[$maxWidth];
   }};
 `;
 

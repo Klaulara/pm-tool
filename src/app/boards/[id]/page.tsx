@@ -1,7 +1,7 @@
 'use client';
 
 import styled from 'styled-components';
-import { useState, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import { useBoardStore, type Task } from '@/store/boardStore';
 import { HeaderBoards } from '@/components/HeaderBoards';
 import { KanbanColumn } from '@/components/KanbanColumn';
@@ -27,17 +27,26 @@ import AddColumnButton from '@/components/AddColumnButton';
 import CreateColumnModal from '@/components/modals/CreateColumnModal';
 
 // Styled Components
+const BoardWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+`;
+
 const BoardMain = styled.main`
   padding: ${({ theme }) => theme.spacing.xl} 0;
-  min-height: calc(100vh - 120px);
+  flex: 1;
   background-color: ${({ theme }) => theme.colors.background.secondary};
   display: flex;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
   scroll-behavior: smooth;
   
   &::-webkit-scrollbar {
     height: 12px;
+    width: 12px;
   }
   
   &::-webkit-scrollbar-track {
@@ -59,6 +68,7 @@ const KanbanContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.lg};
   padding-bottom: ${({ theme }) => theme.spacing.md};
+  min-height: 100%;
 `;
 
 // Types
@@ -110,6 +120,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
     const [boardConfigurationModalOpen, setBoardConfigurationModalOpen] = useState(false);
     const [newBoardName, setNewBoardName] = useState('');
     const [newBoardDescription, setNewBoardDescription] = useState('');
+    const [isBoardStarred, setIsBoardStarred] = useState(false);
     const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
     const [newColumnName, setNewColumnName] = useState('');
     const [newColumnColor, setNewColumnColor] = useState('#000000');
@@ -123,6 +134,18 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
             },
         })
     );
+
+    // Initialize board configuration when modal opens
+    useEffect(() => {
+        if (boardConfigurationModalOpen && board) {
+            // Use setState callback pattern to avoid cascading renders
+            Promise.resolve().then(() => {
+                setNewBoardName(board.name);
+                setNewBoardDescription(board.description || '');
+                setIsBoardStarred(board.isStarred || false);
+            });
+        }
+    }, [boardConfigurationModalOpen, board]);
 
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
@@ -204,6 +227,8 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
             adjustedDueDate = date.toISOString();
         }
 
+        const now = new Date().toISOString();
+
         useBoardStore.getState().addTask({
             boardId: boardId,
             title: newTaskName,
@@ -212,9 +237,10 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
             dueDate: adjustedDueDate,
             priority: newTaskPriority,
             tags: selectedTags,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: now,
+            updatedAt: now,
             subTasks: [],
+            statusHistory: [{ status: selectedColumnStatus, timestamp: now }],
         });
         
         // Reset form
@@ -240,10 +266,12 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
         useBoardStore.getState().updateBoard(boardId, {
             name: newBoardName,
             description: newBoardDescription,
+            isStarred: isBoardStarred,
         });
         setBoardConfigurationModalOpen(false);
         setNewBoardName('');
         setNewBoardDescription('');
+        setIsBoardStarred(false);
     };
 
     const handleColumnCreate = () => {
@@ -277,21 +305,22 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
-                <HeaderBoards
-                    board={board}
-                    setIsCreateModalOpen={() => handleOpenCreateModal()}
-                    setBoardConfigurationModalOpen={setBoardConfigurationModalOpen}
-                    setIsManageTagsModalOpen={setIsManageTagsModalOpen}
-                    setIsDeleteBoardModalOpen={setIsDeleteBoardModalOpen}
-                />
+                <BoardWrapper>
+                    <HeaderBoards
+                        board={board}
+                        setIsCreateModalOpen={() => handleOpenCreateModal()}
+                        setBoardConfigurationModalOpen={setBoardConfigurationModalOpen}
+                        setIsManageTagsModalOpen={setIsManageTagsModalOpen}
+                        setIsDeleteBoardModalOpen={setIsDeleteBoardModalOpen}
+                    />
 
-                <BoardMain>
-                    <Container maxWidth="full">
-                        <SortableContext
-                            items={columns.map((col) => col.id)}
-                            strategy={horizontalListSortingStrategy}
-                        >
-                            <KanbanContainer>
+                    <BoardMain>
+                        <Container $maxWidth="full">
+                            <SortableContext
+                                items={columns.map((col) => col.id)}
+                                strategy={horizontalListSortingStrategy}
+                            >
+                                <KanbanContainer>
                                 {columns.map((column) => (
                                     <KanbanColumn
                                         key={column.id}
@@ -310,6 +339,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                         </SortableContext>
                     </Container>
                 </BoardMain>
+                </BoardWrapper>
 
                 <DragOverlay>
                     {activeTask ? <TaskCardOverlay task={activeTask} /> : null}
@@ -343,6 +373,8 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
                     setNewBoardName={setNewBoardName}
                     newBoardDescription={newBoardDescription}
                     setNewBoardDescription={setNewBoardDescription}
+                    isStarred={isBoardStarred}
+                    setIsStarred={setIsBoardStarred}
                     handleEditBoard={handleEditBoard}
                 />
             )}

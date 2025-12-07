@@ -52,6 +52,7 @@ export interface Task {
     subTasks: SubTask[];
     stimatedTime?: number;
     boardId: string;
+    statusHistory?: { status: string; timestamp: string }[];
 }
 
 interface BoardStore {
@@ -203,6 +204,25 @@ const initialColumns: Column[] = [
     }
 ];
 
+// Helper function to calculate task counts for a board
+const calculateTaskCounts = (boardTasks: Task[]) => {
+  // Total: todas las tareas excepto las que están en 'archive'
+  const total = boardTasks.filter((t) => t.status !== 'archive').length;
+  
+  // Completed: solo tareas en 'done'
+  const completed = boardTasks.filter((t) => t.status === 'done').length;
+  
+  // InProgress: tareas en 'inProgress' + cualquier otra columna personalizada
+  // (excepto 'todo', 'done' y 'archive')
+  const inProgress = boardTasks.filter((t) => 
+    t.status !== 'todo' && 
+    t.status !== 'done' && 
+    t.status !== 'archive'
+  ).length;
+  
+  return { total, completed, inProgress };
+};
+
 export const useBoardStore = create<BoardStore>()(
   persist(
     (set, get) => ({
@@ -223,11 +243,7 @@ export const useBoardStore = create<BoardStore>()(
           ...boardData,
           id: nextId,
           lastUpdated: new Date().toISOString().split('T')[0],
-          tasksCount: {
-            total: 0,
-            completed: 0,
-            inProgress: 0,
-          },
+          tasksCount: calculateTaskCounts([]),
         };
         
         // Crear las 3 columnas fijas por defecto para el nuevo board
@@ -313,11 +329,7 @@ export const useBoardStore = create<BoardStore>()(
               b.id === taskData.boardId
                 ? {
                     ...b,
-                    tasksCount: {
-                      total: boardTasks.length,
-                      completed: boardTasks.filter((t) => t.status === 'done').length,
-                      inProgress: boardTasks.filter((t) => t.status === 'inProgress').length,
-                    },
+                    tasksCount: calculateTaskCounts(boardTasks),
                     lastUpdated: new Date().toISOString().split('T')[0],
                   }
                 : b
@@ -346,11 +358,7 @@ export const useBoardStore = create<BoardStore>()(
               b.id === task.boardId
                 ? {
                     ...b,
-                    tasksCount: {
-                      total: boardTasks.length,
-                      completed: boardTasks.filter((t) => t.status === 'done').length,
-                      inProgress: boardTasks.filter((t) => t.status === 'inProgress').length,
-                    },
+                    tasksCount: calculateTaskCounts(boardTasks),
                     lastUpdated: new Date().toISOString().split('T')[0],
                   }
                 : b
@@ -377,11 +385,7 @@ export const useBoardStore = create<BoardStore>()(
               b.id === task.boardId
                 ? {
                     ...b,
-                    tasksCount: {
-                      total: boardTasks.length,
-                      completed: boardTasks.filter((t) => t.status === 'done').length,
-                      inProgress: boardTasks.filter((t) => t.status === 'inProgress').length,
-                    },
+                    tasksCount: calculateTaskCounts(boardTasks),
                     lastUpdated: new Date().toISOString().split('T')[0],
                   }
                 : b
@@ -398,13 +402,48 @@ export const useBoardStore = create<BoardStore>()(
       },
 
       moveTask: (taskId, newStatus) => {
-        set((state) => ({
-          tasks: state.tasks.map((task) =>
-            task.id === taskId
-              ? { ...task, status: newStatus, updatedAt: new Date().toISOString() }
-              : task
-          ),
-        }));
+        set((state) => {
+          const now = new Date().toISOString();
+          const task = state.tasks.find((t) => t.id === taskId);
+          
+          const updatedTasks = state.tasks.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  status: newStatus,
+                  updatedAt: now,
+                  // Marcar como completada si se mueve a 'done', o quitar la marca si se mueve fuera de 'done'
+                  completedAt: newStatus === 'done' ? now : undefined,
+                  // Registrar el historial de estados
+                  statusHistory: [
+                    ...(t.statusHistory || []),
+                    { status: newStatus, timestamp: now },
+                  ],
+                }
+              : t
+          );
+          
+          // Actualizar el contador del tablero
+          if (task) {
+            const boardTasks = updatedTasks.filter((t) => t.boardId === task.boardId);
+            const updatedBoards = state.boards.map((b) =>
+              b.id === task.boardId
+                ? {
+                    ...b,
+                    tasksCount: calculateTaskCounts(boardTasks),
+                    lastUpdated: new Date().toISOString().split('T')[0],
+                  }
+                : b
+            );
+            
+            return {
+              tasks: updatedTasks,
+              boards: updatedBoards,
+            };
+          }
+          
+          return { tasks: updatedTasks };
+        });
       },
 
       // Column actions
@@ -462,13 +501,17 @@ export const useBoardStore = create<BoardStore>()(
           id: `sub-${Date.now()}`,
           title,
           completed: false,
-          createdAt: new Date().toISOString().split('T')[0],
+          createdAt: new Date().toISOString(),
         };
         
         set((state) => ({
           tasks: state.tasks.map((task) =>
             task.id === taskId
-              ? { ...task, subTasks: [...task.subTasks, newSubTask] }
+              ? { 
+                  ...task, 
+                  subTasks: [...task.subTasks, newSubTask],
+                  updatedAt: new Date().toISOString(),
+                }
               : task
           ),
         }));
@@ -483,6 +526,7 @@ export const useBoardStore = create<BoardStore>()(
                   subTasks: task.subTasks.map((sub) =>
                     sub.id === subTaskId ? { ...sub, completed: !sub.completed } : sub
                   ),
+                  updatedAt: new Date().toISOString(),
                 }
               : task
           ),
@@ -493,7 +537,11 @@ export const useBoardStore = create<BoardStore>()(
         set((state) => ({
           tasks: state.tasks.map((task) =>
             task.id === taskId
-              ? { ...task, subTasks: task.subTasks.filter((sub) => sub.id !== subTaskId) }
+              ? { 
+                  ...task, 
+                  subTasks: task.subTasks.filter((sub) => sub.id !== subTaskId),
+                  updatedAt: new Date().toISOString(),
+                }
               : task
           ),
         }));
