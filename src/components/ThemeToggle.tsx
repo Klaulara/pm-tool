@@ -57,6 +57,7 @@ export const ThemeToggle: React.FC = () => {
 
   // Evitar hydration mismatch - patrón estándar para componentes client-side
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

@@ -1,7 +1,9 @@
 'use client';
 
+import { memo } from 'react';
 import styled from 'styled-components';
 import { Input, Button } from './ui';
+import { Board } from '@/types/store';
 
 const FiltersContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.background.primary};
@@ -53,11 +55,6 @@ const Select = styled.select`
   }
 `;
 
-interface Board {
-  id: string;
-  name: string;
-}
-
 interface DashboardFiltersProps {
   boards: Board[];
   selectedBoard: string;
@@ -67,7 +64,7 @@ interface DashboardFiltersProps {
   onReset: () => void;
 }
 
-export function DashboardFilters({
+export const DashboardFilters = memo(function DashboardFilters({
   boards,
   selectedBoard,
   onBoardChange,
@@ -118,4 +115,4 @@ export function DashboardFilters({
       </FiltersGrid>
     </FiltersContainer>
   );
-}
+});

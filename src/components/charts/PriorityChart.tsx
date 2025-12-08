@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import styled from 'styled-components';
+import { PriorityData } from '@/types/charts';
 
 const ChartContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.background.primary};
@@ -24,18 +25,11 @@ const CanvasWrapper = styled.div`
   height: 300px;
 `;
 
-interface PriorityData {
-  low: number;
-  medium: number;
-  high: number;
-  urgent: number;
-}
-
 interface PriorityChartProps {
   data: PriorityData;
 }
 
-export function PriorityChart({ data }: PriorityChartProps) {
+export const PriorityChart = memo(function PriorityChart({ data }: PriorityChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -118,4 +112,4 @@ export function PriorityChart({ data }: PriorityChartProps) {
       </CanvasWrapper>
     </ChartContainer>
   );
-}
+});

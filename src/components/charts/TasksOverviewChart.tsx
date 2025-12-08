@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import styled from 'styled-components';
 
@@ -30,7 +30,7 @@ interface TasksOverviewChartProps {
   inProgress: number;
 }
 
-export function TasksOverviewChart({ total, completed, inProgress }: TasksOverviewChartProps) {
+export const TasksOverviewChart = memo(function TasksOverviewChart({ total, completed, inProgress }: TasksOverviewChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -113,4 +113,4 @@ export function TasksOverviewChart({ total, completed, inProgress }: TasksOvervi
       </CanvasWrapper>
     </ChartContainer>
   );
-}
+});

@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import styled from 'styled-components';
+import { StatusData } from '@/types/charts';
 
 const ChartContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.background.primary};
@@ -24,17 +25,11 @@ const CanvasWrapper = styled.div`
   height: 300px;
 `;
 
-interface StatusData {
-  status: string;
-  count: number;
-  color: string;
-}
-
 interface TasksByStatusChartProps {
   data: StatusData[];
 }
 
-export function TasksByStatusChart({ data }: TasksByStatusChartProps) {
+export const TasksByStatusChart = memo(function TasksByStatusChart({ data }: TasksByStatusChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -106,4 +101,4 @@ export function TasksByStatusChart({ data }: TasksByStatusChartProps) {
       </CanvasWrapper>
     </ChartContainer>
   );
-}
+});

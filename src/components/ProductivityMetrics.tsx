@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import styled from 'styled-components';
 
 const MetricsContainer = styled.div`
@@ -49,7 +50,7 @@ interface ProductivityMetricsProps {
   velocity?: number; // Tasks completed per week
 }
 
-export function ProductivityMetrics({
+export const ProductivityMetrics = memo(function ProductivityMetrics({
   completedToday,
   completedThisWeek,
   averagePerDay,
@@ -85,4 +86,4 @@ export function ProductivityMetrics({
       </MetricsGrid>
     </MetricsContainer>
   );
-}
+});

@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Container, Flex, Button } from './ui';
+import { Flex, Button } from './ui';
 import { ThemeToggle } from './ThemeToggle';
 
 const BoardHeader = styled.header`

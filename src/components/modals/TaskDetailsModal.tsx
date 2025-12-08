@@ -3,7 +3,9 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton, ModalBody, ModalFooter } from '../ui/Modal';
 import { FormGroup, Label, Input, Button, Select, Badge } from '../ui';
-import { useBoardStore, type Task, type Tags } from '@/store/boardStore';
+import { useTaskStore } from '@/store/tasks';
+import { useTagStore } from '@/store/tags';
+import type { Task, Tag } from '@/types/store';
 
 const TabContainer = styled.div`
   display: flex;
@@ -179,29 +181,6 @@ const EmptyTagsMessage = styled.p`
   margin: 0;
 `;
 
-const ColorPickerContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xs};
-`;
-
-const ColorPicker = styled.input`
-  width: 60px;
-  height: 38px;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-  
-  &::-webkit-color-swatch-wrapper {
-    padding: 2px;
-  }
-  
-  &::-webkit-color-swatch {
-    border: none;
-    border-radius: ${({ theme }) => theme.borderRadius.sm};
-  }
-`;
-
 const SubTasksSection = styled.div`
   margin-top: ${({ theme }) => theme.spacing.lg};
 `;
@@ -262,16 +241,16 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ isOpen, onClose, ta
   const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write');
   
   // Tags state
-  const [selectedTags, setSelectedTags] = useState<Tags[]>(task.tags || []);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(task.tags || []);
   
   // SubTasks state
   const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
   
-  const updateTask = useBoardStore((state) => state.updateTask);
-  const addSubTask = useBoardStore((state) => state.addSubTask);
-  const toggleSubTask = useBoardStore((state) => state.toggleSubTask);
-  const deleteSubTask = useBoardStore((state) => state.deleteSubTask);
-  const allTags = useBoardStore((state) => state.tags);
+  const updateTask = useTaskStore((state) => state.updateTask);
+  const addSubTask = useTaskStore((state) => state.addSubTask);
+  const toggleSubTask = useTaskStore((state) => state.toggleSubTask);
+  const deleteSubTask = useTaskStore((state) => state.deleteSubTask);
+  const allTags = useTagStore((state) => state.tags);
   
   // Get available tags (not already selected)
   const availableTags = allTags.filter(
@@ -299,7 +278,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ isOpen, onClose, ta
     onClose();
   };
 
-  const handleAddTag = (tag: Tags) => {
+  const handleAddTag = (tag: Tag) => {
     setSelectedTags([...selectedTags, tag]);
   };
 

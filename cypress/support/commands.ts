@@ -8,30 +8,33 @@
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+// Custom command for drag and drop with @dnd-kit
+Cypress.Commands.add('dragAndDrop', (dragSelector: string, dropSelector: string) => {
+  cy.get(dragSelector)
+    .trigger('mousedown', { which: 1, force: true })
+    .wait(100)
+    
+  cy.get(dropSelector)
+    .trigger('mousemove', { force: true })
+    .wait(100)
+    .trigger('mouseup', { force: true })
+})
+
+// Custom command for drag to coordinates
+Cypress.Commands.add('dragToCoordinates', (selector: string, x: number, y: number) => {
+  cy.get(selector)
+    .trigger('mousedown', { which: 1, force: true })
+    .trigger('mousemove', { clientX: x, clientY: y, force: true })
+    .wait(100)
+    .trigger('mouseup', { force: true })
+})
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      dragAndDrop(dragSelector: string, dropSelector: string): Chainable<void>
+      dragToCoordinates(selector: string, x: number, y: number): Chainable<void>
+    }
+  }
+}

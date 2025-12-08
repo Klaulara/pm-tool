@@ -4,7 +4,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Input } from '@/components/ui';
 import { ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton, ModalBody } from '../ui/Modal';
-import { useBoardStore } from '@/store/boardStore';
+import { useTagStore } from '@/store/tags';
 
 const ContentWrapper = styled.div`
   display: flex;
@@ -151,10 +151,10 @@ interface ManageTagsModalProps {
 }
 
 const ManageTagsModal = ({ isOpen, onClose }: ManageTagsModalProps) => {
-  const tags = useBoardStore((state) => state.tags);
-  const addTag = useBoardStore((state) => state.addTag);
-  const updateTag = useBoardStore((state) => state.updateTag);
-  const deleteTag = useBoardStore((state) => state.deleteTag);
+  const tags = useTagStore((state) => state.tags);
+  const addTag = useTagStore((state) => state.addTag);
+  const updateTag = useTagStore((state) => state.updateTag);
+  const deleteTag = useTagStore((state) => state.deleteTag);
 
   const [newTagName, setNewTagName] = useState('');
   const [newTagColor, setNewTagColor] = useState('#3b82f6');

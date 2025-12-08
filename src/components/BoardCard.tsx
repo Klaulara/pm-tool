@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Flex, CardHeader, CardTitle, CardDescription, CardFooter, CardContent, Card, Badge } from './ui';
 import styled from 'styled-components';
-import { Board } from '@/store/boardStore';
+import { Board } from '@/types/store';
 
 const BoardCard = styled(Card)`
   cursor: pointer;
@@ -46,11 +46,11 @@ interface BoardCardProps {
     getCompletionPercentage: (board: Board) => number;
 }
 
-const BoardCardComponent = ({ board, handleBoardClick, getCompletionPercentage }: BoardCardProps) => {
+const BoardCardComponent = memo(function BoardCardComponent({ board, handleBoardClick, getCompletionPercentage }: BoardCardProps) {
 
     return (
         <BoardCard
-            hoverable
+            $hoverable
             padding="md"
             onClick={() => handleBoardClick(board.id)}
         >
@@ -137,6 +137,14 @@ const BoardCardComponent = ({ board, handleBoardClick, getCompletionPercentage }
             </CardFooter>
         </BoardCard>
     )
-}
+}, (prevProps, nextProps) => {
+    // Only re-render if board data changed
+    return (
+        prevProps.board.id === nextProps.board.id &&
+        prevProps.board.lastUpdated === nextProps.board.lastUpdated &&
+        prevProps.board.tasksCount.total === nextProps.board.tasksCount.total &&
+        prevProps.board.tasksCount.completed === nextProps.board.tasksCount.completed
+    );
+});
 
 export default BoardCardComponent;

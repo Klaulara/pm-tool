@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import styled from 'styled-components';
-import { useBoardStore } from '@/store/boardStore';
+import { useBoardStore } from '@/store/boards';
 
 const SideMenuContainer = styled.aside<{ $isCollapsed: boolean }>`
   position: fixed;
@@ -202,7 +202,11 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const boards = useBoardStore((state) => state.boards);
+  const boardsData = useBoardStore((state) => state.boards);
+  const boards = useMemo(() => {
+    const { byId, allIds } = boardsData;
+    return allIds.map((id) => byId[id]);
+  }, [boardsData]);
 
   const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
 
@@ -257,6 +261,15 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
             <MenuIcon>📊</MenuIcon>
             <MenuText $isCollapsed={isCollapsed}>Todos los Tableros</MenuText>
             {!isCollapsed && <BoardCount $isCollapsed={isCollapsed}>{boards.length}</BoardCount>}
+          </MenuItem>
+
+          <MenuItem
+            $active={isActive('/tasks')}
+            $isCollapsed={isCollapsed}
+            onClick={() => handleNavigate('/tasks')}
+          >
+            <MenuIcon>✅</MenuIcon>
+            <MenuText $isCollapsed={isCollapsed}>Todas las Tareas</MenuText>
           </MenuItem>
         </MenuSection>
 

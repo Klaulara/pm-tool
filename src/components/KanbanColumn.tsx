@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import styled from 'styled-components';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui';
 import { SortableTaskCard } from '@/components/TaskCard';
-import type { Task } from '@/store/boardStore';
+import type { Task } from '@/types/store';
 
 // Styled Components
 const KanbanColumnContainer = styled.div`
@@ -373,6 +373,7 @@ export function KanbanColumn({ id, title, color, tasks, onAddTask, onEditColumn,
                 <p>No tasks</p>
               </EmptyState>
             ) : (
+              // Optimized rendering with React.memo on TaskCard
               tasks.map((task) => (
                 <SortableTaskCard key={task.id} task={task} />
               ))

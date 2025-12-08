@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useBoardStore } from '@/store/boardStore';
-import { useState } from 'react';
+import { useBoardStore } from '@/store/boards';
+import { useState, useMemo } from 'react';
 import SearchBar from '@/components/SearchBar';
 import { Container, Grid } from '@/components/ui';
 import styled from 'styled-components';
@@ -10,6 +10,7 @@ import BoardCardComponent from '@/components/BoardCard';
 import Header from '@/components/Header';
 import CreateBoard from '@/components/CreateBoard';
 import CreateBoardModal from '@/components/modals/CreateBoardModal';
+import type { Board } from '@/types/store';
 
 const Main = styled.main`
   padding: ${({ theme }) => theme.spacing.xl} 0;
@@ -18,7 +19,11 @@ const Main = styled.main`
 
 const BoardsPage = () => {
     const router = useRouter();
-    const boards = useBoardStore((state) => state.boards);
+    const boardsData = useBoardStore((state) => state.boards);
+    const boards = useMemo(() => {
+        const { byId, allIds } = boardsData;
+        return allIds.map((id) => byId[id]);
+    }, [boardsData]);
     const addBoard = useBoardStore((state) => state.addBoard);
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -27,12 +32,12 @@ const BoardsPage = () => {
     const [newBoardDescription, setNewBoardDescription] = useState('');
 
     const filteredBoards = boards.filter(
-        (board) =>
+        (board: Board) =>
             board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             board.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const getCompletionPercentage = (board: typeof boards[0]) => {
+    const getCompletionPercentage = (board: Board) => {
         if (board.tasksCount.total === 0) return 0;
         return Math.round((board.tasksCount.completed / board.tasksCount.total) * 100);
     };
@@ -76,7 +81,7 @@ const BoardsPage = () => {
                             </div>
 
                             {/* Board Cards */}
-                            {filteredBoards.map((board) => (
+                            {filteredBoards.map((board: Board) => (
                                 <div key={board.id}>
                                     <BoardCardComponent
                                         board={board}

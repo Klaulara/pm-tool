@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton, ModalBody, ModalFooter } from '../ui/Modal';
 import { FormGroup, Label, Input, Button, Select } from '../ui';
-import type { Tags } from '@/store/boardStore';
+import type { Tag } from '@/types/store';
 
 const TabContainer = styled.div`
   display: flex;
@@ -198,9 +198,9 @@ interface CreateBoardModalProps {
     setNewTaskDueDate: (dueDate: string) => void;
     newTaskEstimatedHours?: number;
     setNewTaskEstimatedHours?: (hours: number) => void;
-    selectedTags?: Tags[];
-    setSelectedTags?: (tags: Tags[]) => void;
-    availableTags?: Tags[];
+    selectedTags?: Tag[];
+    setSelectedTags?: (tags: Tag[]) => void;
+    availableTags?: Tag[];
     handleCreateTask: (createAnother?: boolean) => void;
 }
 
@@ -387,7 +387,7 @@ const CreateTaskModal = ({
         }
     };
 
-    const handleToggleTag = (tag: Tags) => {
+    const handleToggleTag = (tag: Tag) => {
         if (!setSelectedTags) return;
         
         const isSelected = selectedTags.some(t => t.id === tag.id);

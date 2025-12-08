@@ -14,10 +14,9 @@ const MainContent = styled.main<{ $sideMenuWidth: number }>`
   flex: 1;
   margin-left: ${({ $sideMenuWidth }) => $sideMenuWidth}px;
   transition: margin-left 0.3s ease;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 `;
 
 interface AppLayoutProps {

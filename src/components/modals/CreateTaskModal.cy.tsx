@@ -1,7 +1,16 @@
 import React from 'react'
 import CreateTaskModal from './CreateTaskModal'
+import { ThemeProvider } from '@/styles/ThemeProvider'
 
 describe('<CreateTaskModal />', () => {
+  const mountWithTheme = (component: React.ReactElement) => {
+    cy.mount(
+      <ThemeProvider>
+        {component}
+      </ThemeProvider>
+    )
+  }
+
   it('renders and displays modal correctly', () => {
     const mockSetIsOpen = cy.stub()
     const mockSetTaskName = cy.stub()
@@ -10,7 +19,7 @@ describe('<CreateTaskModal />', () => {
     const mockSetTaskDueDate = cy.stub()
     const mockHandleCreate = cy.stub()
 
-    cy.mount(
+    mountWithTheme(
       <CreateTaskModal 
         isCreateModalOpen={true}
         setIsCreateModalOpen={mockSetIsOpen}
@@ -31,9 +40,13 @@ describe('<CreateTaskModal />', () => {
     
     // Verify form fields exist
     cy.get('input#task-name').should('exist')
-    cy.get('textarea').should('exist') // Changed from textarea#task-description
+    cy.get('textarea').should('exist')
     cy.get('select#task-priority').should('exist')
     cy.get('input#task-due-date').should('exist')
+    
+    // Verify tabs exist
+    cy.contains('button', 'Write').should('exist')
+    cy.contains('button', 'Preview').should('exist')
   })
 
   it('allows user to fill out the form', () => {
@@ -44,7 +57,7 @@ describe('<CreateTaskModal />', () => {
     const mockSetTaskDueDate = cy.stub()
     const mockHandleCreate = cy.stub()
 
-    cy.mount(
+    mountWithTheme(
       <CreateTaskModal 
         isCreateModalOpen={true}
         setIsCreateModalOpen={mockSetIsOpen}
@@ -65,7 +78,7 @@ describe('<CreateTaskModal />', () => {
     cy.wrap(mockSetTaskName).should('have.been.called')
 
     // Fill description
-    cy.get('textarea#task-description').type('Test Description')
+    cy.get('textarea').type('Test Description')
     cy.wrap(mockSetTaskDescription).should('have.been.called')
 
     // Select priority
@@ -81,7 +94,7 @@ describe('<CreateTaskModal />', () => {
     const mockSetTaskDueDate = cy.stub()
     const mockHandleCreate = cy.stub()
 
-    cy.mount(
+    mountWithTheme(
       <CreateTaskModal 
         isCreateModalOpen={true}
         setIsCreateModalOpen={mockSetIsOpen}
@@ -116,7 +129,7 @@ describe('<CreateTaskModal />', () => {
     const mockSetTaskDueDate = cy.stub()
     const mockHandleCreate = cy.stub()
 
-    cy.mount(
+    mountWithTheme(
       <CreateTaskModal 
         isCreateModalOpen={true}
         setIsCreateModalOpen={mockSetIsOpen}
@@ -147,7 +160,7 @@ describe('<CreateTaskModal />', () => {
     const mockSetTaskDueDate = cy.stub()
     const mockHandleCreate = cy.stub()
 
-    cy.mount(
+    mountWithTheme(
       <CreateTaskModal 
         isCreateModalOpen={true}
         setIsCreateModalOpen={mockSetIsOpen}
@@ -165,5 +178,36 @@ describe('<CreateTaskModal />', () => {
 
     // Create button should be disabled
     cy.contains('button', 'Crear Tarea').should('be.disabled')
+  })
+
+  it('shows validation errors when fields are invalid', () => {
+    const mockSetIsOpen = cy.stub()
+    const mockSetTaskName = cy.stub()
+    const mockSetTaskDescription = cy.stub()
+    const mockSetTaskPriority = cy.stub()
+    const mockSetTaskDueDate = cy.stub()
+    const mockHandleCreate = cy.stub()
+
+    mountWithTheme(
+      <CreateTaskModal 
+        isCreateModalOpen={true}
+        setIsCreateModalOpen={mockSetIsOpen}
+        newTaskName="AB"
+        setNewTaskName={mockSetTaskName}
+        newTaskDescription=""
+        setNewTaskDescription={mockSetTaskDescription}
+        newTaskPriority="low"
+        setNewTaskPriority={mockSetTaskPriority}
+        newTaskDueDate=""
+        setNewTaskDueDate={mockSetTaskDueDate}
+        handleCreateTask={mockHandleCreate}
+      />
+    )
+
+    // Interact with title field to trigger validation
+    cy.get('input#task-name').focus().blur()
+    
+    // Should show validation error
+    cy.contains('Title must be at least 3 characters').should('be.visible')
   })
 })

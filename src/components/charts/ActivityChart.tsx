@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import styled from 'styled-components';
+import { ActivityData } from '@/types/charts';
 
 const ChartContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.background.primary};
@@ -24,17 +25,11 @@ const CanvasWrapper = styled.div`
   height: 300px;
 `;
 
-interface ActivityData {
-  date: string;
-  created: number;
-  completed: number;
-}
-
-interface ActivityChartProps {
+export interface ActivityChartProps {
   data: ActivityData[];
 }
 
-export function ActivityChart({ data }: ActivityChartProps) {
+export const ActivityChart = memo(function ActivityChart({ data }: ActivityChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -120,4 +115,4 @@ export function ActivityChart({ data }: ActivityChartProps) {
       </CanvasWrapper>
     </ChartContainer>
   );
-}
+});

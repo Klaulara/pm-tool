@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import styled from 'styled-components';
+import { BoardData } from '@/types/charts';
 
 const ChartContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.background.primary};
@@ -24,17 +25,11 @@ const CanvasWrapper = styled.div`
   height: 300px;
 `;
 
-interface BoardData {
-  name: string;
-  total: number;
-  completed: number;
-}
-
 interface BoardsComparisonChartProps {
   boards: BoardData[];
 }
 
-export function BoardsComparisonChart({ boards }: BoardsComparisonChartProps) {
+export const BoardsComparisonChart = memo(function BoardsComparisonChart({ boards }: BoardsComparisonChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -120,4 +115,4 @@ export function BoardsComparisonChart({ boards }: BoardsComparisonChartProps) {
       </CanvasWrapper>
     </ChartContainer>
   );
-}
+});

@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import styled from 'styled-components';
+import { ColumnTimeData } from '@/types/charts';
 
 const ChartContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.background.primary};
@@ -24,17 +25,11 @@ const CanvasWrapper = styled.div`
   height: 300px;
 `;
 
-interface ColumnTimeData {
-  column: string;
-  averageHours: number;
-  color: string;
-}
-
 interface AverageTimeInColumnChartProps {
   data: ColumnTimeData[];
 }
 
-export function AverageTimeInColumnChart({ data }: AverageTimeInColumnChartProps) {
+export const AverageTimeInColumnChart = memo(function AverageTimeInColumnChart({ data }: AverageTimeInColumnChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -110,4 +105,4 @@ export function AverageTimeInColumnChart({ data }: AverageTimeInColumnChartProps
       </CanvasWrapper>
     </ChartContainer>
   );
-}
+});

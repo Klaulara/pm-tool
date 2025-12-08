@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { Button, Input } from '@/components/ui';
 import { ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton, ModalBody } from '../ui/Modal';
-import { useBoardStore } from '@/store/boardStore';
+import { useBoardStore } from '@/store/boards';
+import { useTaskStore } from '@/store/tasks';
+import { useColumnStore } from '@/store/columns';
+import type { Task, Column } from '@/types/store';
 
 const ModalContentWrapper = styled.div`
   display: flex;
@@ -116,16 +119,14 @@ interface DeleteBoardModalProps {
 const DeleteBoardModal = ({ isOpen, onClose, boardId, boardName }: DeleteBoardModalProps) => {
   const router = useRouter();
   const deleteBoard = useBoardStore((state) => state.deleteBoard);
-  const boards = useBoardStore((state) => state.boards);
-  const columns = useBoardStore((state) => state.columns);
-  const tasks = useBoardStore((state) => state.tasks);
+  const board = useBoardStore((state) => state.getBoardById(boardId));
+  const columns = useColumnStore((state) => state.columns);
+  const tasks = useTaskStore((state) => state.tasks);
   const [confirmText, setConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const board = boards.find(b => b.id === boardId);
   
-  const boardColumns = columns.filter(col => col.boardId === boardId);
-  const boardTasks = tasks.filter(task => task.boardId === boardId);
+  const boardColumns = columns.filter((col: Column) => col.boardId === boardId);
+  const boardTasks = tasks.filter((task: Task) => task.boardId === boardId);
   const totalTasks = boardTasks.length;
   const totalColumns = boardColumns.length;
 
