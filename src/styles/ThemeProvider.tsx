@@ -27,24 +27,32 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Initialize theme from localStorage or system preference
-  const getInitialTheme = (): ThemeMode => {
-    if (typeof window === 'undefined') return 'light';
-    
+  const [theme, setThemeState] = useState<ThemeMode>('light');
+  const [mounted, setMounted] = useState(false);
+
+  // Initialize theme on mount to prevent hydration mismatch
+  useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as ThemeMode;
-    if (savedTheme) return savedTheme;
-    
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
-  };
-  
-  const [theme, setThemeState] = useState<ThemeMode>(getInitialTheme);
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+      setThemeState(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = prefersDark ? 'dark' : 'light';
+      setThemeState(initialTheme);
+      document.documentElement.setAttribute('data-theme', initialTheme);
+      localStorage.setItem('theme', initialTheme);
+    }
+    setMounted(true);
+  }, []);
 
   // Save theme to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('theme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    if (mounted) {
+      localStorage.setItem('theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [theme, mounted]);
 
   const toggleTheme = () => {
     setThemeState((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
