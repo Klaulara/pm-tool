@@ -2,8 +2,8 @@
 
 > **Technical Assessment Project** - A modern, full-featured task management application built with Next.js 15, TypeScript, and Zustand.
 
-![Next.js](https://img.shields.io/badge/Next.js-16.0.5-black?logo=next.js)
-![React](https://img.shields.io/badge/React-19.2.0-blue?logo=react)
+![Next.js](https://img.shields.io/badge/Next.js-16.0.7-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19.2.1-blue?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
 ![Zustand](https://img.shields.io/badge/Zustand-5.0.8-orange)
 ![Styled Components](https://img.shields.io/badge/Styled_Components-6.1.19-pink?logo=styled-components)
@@ -84,8 +84,8 @@ A professional task management application designed to demonstrate advanced Reac
 ## 🛠 Tech Stack
 
 ### Core Technologies
-- **Next.js 16.0.5** - React framework with App Router
-- **React 19.2.0** - UI library
+- **Next.js 16.0.7** - React framework with App Router
+- **React 19.2.1** - UI library
 - **TypeScript 5.x** - Type safety
 - **Styled Components 6.1.19** - CSS-in-JS styling
 
@@ -210,11 +210,6 @@ const useBoardStore = create<BoardStore>()(
 )
 ```
 
-**Alternatives Considered:**
-- **Redux Toolkit**: Too verbose for this app size
-- **Context + useReducer**: Lacks persistence, performance issues
-- **Jotai/Recoil**: Atomic state not needed for this use case
-
 ### 2. Styling: Styled Components
 
 **Why Styled Components?**
@@ -322,53 +317,116 @@ This application uses **Zustand** for state management, chosen for its simplicit
 
 ### Store Architecture
 
-#### Board Store (`src/store/boardStore.ts`)
-Central store for all entity management:
+The application uses a **separated stores architecture** for better maintainability and organization:
+
+#### Board Store (`src/store/boards.ts`)
+Manages boards with normalized state:
 
 ```typescript
-interface BoardStore {
-  // State
-  boards: Board[]
-  tasks: Task[]
-  columns: Column[]
-  tags: Tag[]
-  
-  // Board Actions
+interface BoardState {
+  boards: NormalizedBoards // { byId: Record<string, Board>, allIds: string[] }
+}
+
+interface BoardActions {
   addBoard: (board: Omit<Board, 'id' | 'lastUpdated'>) => void
   updateBoard: (id: string, updates: Partial<Board>) => void
-  deleteBoard: (id: string) => void
+  deleteBoard: (id: string) => void // Cascade deletes tasks and columns
   toggleStarBoard: (id: string) => void
-  
-  // Task Actions
+  getBoardById: (id: string) => Board | undefined
+  updateBoardTaskCount: (boardId: string, delta: object) => void
+}
+```
+
+**Features:**
+- Normalized state for O(1) lookups
+- Auto-creates default columns (To Do, In Progress, Done)
+- Cascade deletion of associated tasks and columns
+- Counter validation (never negative)
+- Sequential IDs: `board-1`, `board-2`, etc.
+
+#### Task Store (`src/store/tasks.ts`)
+Manages tasks and subtasks:
+
+```typescript
+interface TaskState {
+  tasks: Task[]
+}
+
+interface TaskActions {
   addTask: (task: Omit<Task, 'id'>) => void
-  updateTask: (id: string, updates: Partial<Task>) => void
+  updateTask: (id: string, task: Partial<Task>) => void
   deleteTask: (id: string) => void
-  moveTask: (taskId: string, newStatus: string) => void
-  
-  // SubTask Actions
+  moveTask: (taskId: string, newStatus: Task['status']) => void
+  reorderTasks: (boardId: string, status: string, taskIds: string[]) => void
   addSubTask: (taskId: string, title: string) => void
   toggleSubTask: (taskId: string, subTaskId: string) => void
   deleteSubTask: (taskId: string, subTaskId: string) => void
-  
-  // Column Actions
-  addColumn: (column: Omit<Column, 'id' | 'order'>) => void
-  updateColumn: (id: string, updates: Partial<Column>) => void
-  deleteColumn: (id: string) => void
-  reorderColumns: (boardId: string, columnIds: string[]) => void
-  
-  // Tag Actions
-  addTag: (tag: Omit<Tag, 'id'>) => void
-  updateTag: (id: string, updates: Partial<Tag>) => void
-  deleteTag: (id: string) => void
-  
-  // Selectors
-  getBoardById: (id: string) => Board | undefined
   getTasksByBoard: (boardId: string) => Task[]
   getTasksByStatus: (boardId: string, status: string) => Task[]
   searchAndFilterTasks: (filters: TaskFilters) => Task[]
-  
-  // Utility
-  resetStore: () => void
+}
+```
+
+**Features:**
+- Auto-updates board counters on status changes
+- Dynamic state calculation (inProgress, completed)
+- Drag-and-drop reordering support
+- Sequential IDs: `task-1`, `task-2`, etc.
+- Helper functions: `calculateTaskCounts`, `calculateStatusDelta`
+
+#### Column Store (`src/store/columns.ts`)
+Manages board columns:
+
+```typescript
+interface ColumnState {
+  columns: Column[]
+}
+
+interface ColumnActions {
+  addColumn: (columnData: Omit<Column, 'id' | 'order'>) => void
+  updateColumn: (id: string, columnData: Partial<Column>) => void
+  deleteColumn: (id: string) => void // Migrates tasks to 'todo' before deletion
+  reorderColumns: (boardId: string, columnIds: string[]) => void
+  getColumnsByBoard: (boardId: string) => Column[]
+}
+```
+
+**Features:**
+- When deleting column, migrates tasks to 'todo' column (or first available)
+- Only deletes tasks if no columns remain
+- Auto-ordering support
+- Descriptive IDs: `col-todo-board-1`, `col-inProgress-board-2`
+
+#### Tag Store (`src/store/tags.ts`)
+Manages task tags:
+
+```typescript
+interface TagState {
+  tags: Tag[]
+}
+
+interface TagActions {
+  addTag: (tag: Omit<Tag, 'id'>) => void
+  updateTag: (id: string, updates: Partial<Tag>) => void
+  deleteTag: (id: string) => void
+}
+```
+
+#### UI Store (`src/store/ui.ts`)
+Manages global UI state:
+
+```typescript
+interface UIState {
+  loadingStates: Record<string, boolean>
+  errors: Record<string, string | null>
+  toasts: Toast[]
+}
+
+interface UIActions {
+  setLoading: (key: string, isLoading: boolean) => void
+  setError: (key: string, error: string | null) => void
+  addToast: (toast: Omit<Toast, 'id'>) => void
+  removeToast: (id: string) => void
 }
 ```
 
@@ -379,9 +437,10 @@ export const useBoardStore = create<BoardStore>()(
     (set, get) => ({ /* store implementation */ }),
     {
       name: 'board-storage',
-      storage: createDebouncedStorage({
-        debounceMs: 1000 // Debounce writes to prevent excessive localStorage calls
-      })
+      onRehydrateStorage: () => (state) => {
+        // Recalculates counters from actual task state
+        // Prevents incremental counter drift
+      }
     }
   )
 )
@@ -392,8 +451,10 @@ export const useBoardStore = create<BoardStore>()(
 **1. Immutable Updates**
 ```typescript
 addTask: (task) => {
+  const nextTaskNumber = Math.max(...taskNumbers) + 1
+  const newTask = { ...task, id: `task-${nextTaskNumber}` }
   set((state) => ({
-    tasks: [...state.tasks, { ...task, id: generateId() }]
+    tasks: [...state.tasks, newTask]
   }))
 }
 ```
@@ -416,6 +477,23 @@ updateTask: (id, updates) => {
     )
   }))
 }
+```
+
+### Cross-Store Communication
+
+Stores communicate with each other in a controlled manner:
+
+```typescript
+// tasks.ts updates counters in boards.ts
+const updateBoardTaskCount = useBoardStore.getState().updateBoardTaskCount
+updateBoardTaskCount(boardId, { total: 1, completed: 1 })
+
+// boards.ts deletes tasks when deleting board
+import('./tasks').then(({ useTaskStore }) => {
+  tasksToDelete.forEach(task => {
+    useTaskStore.getState().deleteTask(task.id)
+  })
+})
 ```
 
 ### Selectors for Derived State
