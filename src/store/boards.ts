@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Board, Task, Column } from '../types/store';
 import { useUIStore } from './ui';
-import { initialTasks, calculateTaskCounts } from './tasks';
+import { initialBoards } from './initialData';
 import { useColumnStore } from './columns';
 
 // Normalized state structure
@@ -30,20 +30,10 @@ interface BoardActions {
 
 type BoardStore = BoardState & BoardActions;
 
-// Initial data
-const initialBoard: Board = {
-  id: '1',
-  name: 'Task Management System',
-  description: 'Frontend project management tool',
-  tasksCount: calculateTaskCounts(initialTasks.filter(t => t.boardId === '1')),
-  lastUpdated: '2024-12-08T12:00:00Z',
-  isStarred: true,
-};
-
 // Normalize initial data
 const initialBoardsNormalized: NormalizedBoards = {
-  byId: { '1': initialBoard },
-  allIds: ['1'],
+  byId: Object.fromEntries(initialBoards.map(board => [board.id, board])),
+  allIds: initialBoards.map(board => board.id),
 };
 
 export const useBoardStore = create<BoardStore>()(

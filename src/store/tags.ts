@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Tag } from '../types/store';
 import { useTaskStore } from './tasks';
+import { initialTags } from './initialData';
 
 interface TagState {
   tags: Tag[];
@@ -15,12 +16,6 @@ interface TagActions {
 }
 
 type TagStore = TagState & TagActions;
-
-const initialTags: Tag[] = [
-  { id: 'tag-1', name: 'Frontend', color: '#a74949' },
-  { id: 'tag-2', name: 'Backend', color: '#5656c2' },
-  { id: 'tag-3', name: 'Devops', color: '#5db65d' },
-];
 
 export const useTagStore = create<TagStore>()(
   persist(

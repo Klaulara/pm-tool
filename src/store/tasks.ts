@@ -2,6 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Task, SubTask, TaskFilters } from '../types/store';
 import { useBoardStore } from './boards';
+import { calculateTaskCounts, calculateStatusDelta } from '../utils/taskCalculations';
+import { initialTasks } from './initialData';
+
+// Re-export for backward compatibility
+export { calculateTaskCounts, calculateStatusDelta };
 
 interface TaskState {
   tasks: Task[];
@@ -23,137 +28,6 @@ interface TaskActions {
 }
 
 type TaskStore = TaskState & TaskActions;
-
-// Helper function to calculate task counts for a board
-export const calculateTaskCounts = (boardTasks: Task[]) => {
-  const total = boardTasks.filter((t) => t.status !== 'archive').length;
-  const completed = boardTasks.filter((t) => t.status === 'done').length;
-  const inProgress = boardTasks.filter((t) => 
-    t.status !== 'todo' && 
-    t.status !== 'done' && 
-    t.status !== 'archive'
-  ).length;
-  
-  return { total, completed, inProgress };
-};
-
-// Helper function to determine if a status counts as "inProgress"
-const isInProgressStatus = (status: Task['status']) => {
-  return status !== 'todo' && status !== 'done' && status !== 'archive';
-};
-
-// Helper function to calculate delta when status changes
-const calculateStatusDelta = (oldStatus: Task['status'], newStatus: Task['status']) => {
-  const delta: { total?: number; completed?: number; inProgress?: number } = {};
-  
-  // Handle archive status changes
-  if (oldStatus === 'archive' && newStatus !== 'archive') {
-    delta.total = 1;
-  } else if (oldStatus !== 'archive' && newStatus === 'archive') {
-    delta.total = -1;
-  }
-  
-  // Handle completed status changes
-  if (oldStatus === 'done' && newStatus !== 'done') {
-    delta.completed = -1;
-  } else if (oldStatus !== 'done' && newStatus === 'done') {
-    delta.completed = 1;
-  }
-  
-  // Handle inProgress status changes
-  const wasInProgress = isInProgressStatus(oldStatus);
-  const isNowInProgress = isInProgressStatus(newStatus);
-  
-  if (wasInProgress && !isNowInProgress) {
-    delta.inProgress = -1;
-  } else if (!wasInProgress && isNowInProgress) {
-    delta.inProgress = 1;
-  }
-  
-  return delta;
-};
-
-
-// Initial data
-export const initialTasks: Task[] = [
-  {
-    id: 'task-1',
-    title: 'Implement localStorage persistence',
-    description: 'Use localStorage to save the application state',
-    priority: 'high',
-    dueDate: '2025-12-10T23:59:59.000Z',
-    status: 'todo',
-    createdAt: '2025-12-01T10:00:00.000Z',
-    updatedAt: '2025-12-08T10:00:00.000Z',
-    subTasks: [],
-    boardId: '1',
-  },
-  {
-    id: 'task-2',
-    title: 'Design user interface',
-    description: 'Create wireframes and mockups for the application',
-    priority: 'medium',
-    status: 'inProgress',
-    createdAt: '2025-12-01T10:00:00.000Z',
-    updatedAt: '2025-12-07T10:00:00.000Z',
-    subTasks: [],
-    boardId: '1',
-  },
-  {
-    id: 'task-3',
-    title: 'Set up development environment',
-    description: 'Install dependencies and configure necessary tools',
-    priority: 'low',
-    status: 'done',
-    createdAt: '2025-12-01T10:00:00.000Z',
-    updatedAt: '2025-12-07T10:00:00.000Z',
-    completedAt: '2025-12-07T10:00:00.000Z',
-    subTasks: [
-      {
-        id: 'subtask-1',
-        title: 'Instalar dependencias',
-        completed: true,
-         createdAt: '2025-12-01T10:00:00.000Z',
-      },
-      {
-        id: 'subtask-2',
-        title: 'Configurar linter',
-        completed: true,
-         createdAt: '2025-12-01T10:00:00.000Z',
-      },
-      {
-        id: 'subtask-3',
-        title: 'Configurar zustand',
-        completed: true,
-        createdAt: '2025-12-01T10:00:00.000Z',
-      },
-    ],
-    boardId: '1',
-  },
-  {
-    id: 'task-4',
-    title: 'Write documentation',
-    description: 'Create documentation for the use and development of the project',
-    priority: 'urgent',
-    status: 'todo',
-    createdAt: '2025-12-01T10:00:00.000Z',
-    updatedAt: '2025-12-08T10:00:00.000Z',
-    subTasks: [],
-    boardId: '1',
-  },
-  {
-    id: 'task-5',
-    title: 'Write unit tests',
-    description: 'Write and run unit tests for the main components',
-    priority: 'high',
-    status: 'done',
-    createdAt: '2025-12-01T10:00:00.000Z',
-    updatedAt: '2025-12-07T10:00:00.000Z',
-    completedAt: '2025-12-07T10:00:00.000Z',
-    subTasks: [],
-    boardId: '1',
-  }
-];
 
 export const useTaskStore = create<TaskStore>()(
   persist(

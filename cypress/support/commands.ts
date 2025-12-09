@@ -30,11 +30,15 @@ Cypress.Commands.add('dragToCoordinates', (selector: string, x: number, y: numbe
     .trigger('mouseup', { force: true })
 })
 
+// Type definitions for custom commands
+export {}
+
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      dragAndDrop(dragSelector: string, dropSelector: string): Chainable<void>
-      dragToCoordinates(selector: string, x: number, y: number): Chainable<void>
+      dragAndDrop(dragSelector: string, dropSelector: string): Chainable<JQuery<HTMLElement>>
+      dragToCoordinates(selector: string, x: number, y: number): Chainable<JQuery<HTMLElement>>
     }
   }
 }

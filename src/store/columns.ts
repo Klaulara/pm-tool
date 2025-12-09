@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Column, Task } from '../types/store';
+import { initialColumns } from './initialData';
 
 interface ColumnState {
   columns: Column[];
@@ -15,37 +16,6 @@ interface ColumnActions {
 }
 
 type ColumnStore = ColumnState & ColumnActions;
-
-// Initial data
-const initialColumns: Column[] = [
-  {
-    id: 'col-todo-1-board-1',
-    title: 'To Do',
-    status: 'todo',
-    color: '#FF5733',
-    order: 1,
-    isFixed: true,
-    boardId: '1',
-  },
-  {
-    id: 'col-inProgress-2-board-1',
-    title: 'In Progress',
-    status: 'inProgress',
-    color: '#33C3FF',
-    order: 2,
-    isFixed: true,
-    boardId: '1',
-  },
-  {
-    id: 'col-done-3-board-1',
-    title: 'Done',
-    status: 'done',
-    color: '#28A745',
-    order: 3,
-    isFixed: true,
-    boardId: '1',
-  },
-];
 
 export const useColumnStore = create<ColumnStore>()(
   persist(
