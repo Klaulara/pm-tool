@@ -46,10 +46,10 @@ export const PriorityChart = memo(function PriorityChart({ data }: PriorityChart
     const config: ChartConfiguration = {
       type: 'bar',
       data: {
-        labels: ['Baja', 'Media', 'Alta', 'Urgente'],
+        labels: ['Low', 'Medium', 'High', 'Urgent'],
         datasets: [
           {
-            label: 'Tareas por Prioridad',
+            label: 'Tasks by Priority',
             data: [data.low, data.medium, data.high, data.urgent],
             backgroundColor: [
               'rgba(59, 130, 246, 0.8)', // Blue for low
@@ -106,7 +106,7 @@ export const PriorityChart = memo(function PriorityChart({ data }: PriorityChart
 
   return (
     <ChartContainer>
-      <ChartTitle>Tareas por Prioridad</ChartTitle>
+      <ChartTitle>Tasks by Priority</ChartTitle>
       <CanvasWrapper>
         <canvas ref={canvasRef}></canvas>
       </CanvasWrapper>

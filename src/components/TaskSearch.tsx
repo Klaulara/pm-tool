@@ -114,12 +114,14 @@ const TaskSearch = ({ onFiltersChange, initialFilters = {} }: TaskSearchProps) =
   // Debounce search query to avoid excessive filtering
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // Update filters when debounced search changes
+  // Update parent component when debounced search changes
   useEffect(() => {
-    const newFilters = { ...filters, searchQuery: debouncedSearchQuery || undefined };
-    setFilters(newFilters);
-    onFiltersChange(newFilters);
-  }, [debouncedSearchQuery]);
+    if (debouncedSearchQuery !== filters.searchQuery) {
+      const newFilters = { ...filters, searchQuery: debouncedSearchQuery || undefined };
+      onFiltersChange(newFilters);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchQuery, onFiltersChange]);
 
   const handleFilterChange = (key: keyof TaskFilters, value: unknown) => {
     const newFilters = { ...filters, [key]: value };
@@ -155,10 +157,10 @@ const TaskSearch = ({ onFiltersChange, initialFilters = {} }: TaskSearchProps) =
     <SearchContainer>
       <SearchRow>
         <FilterGroup style={{ flex: 2 }}>
-          <Label>Buscar tareas</Label>
+          <Label>Search Tasks</Label>
           <Input
             type="text"
-            placeholder="Buscar por título o descripción..."
+            placeholder="Search by title or description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -172,7 +174,7 @@ const TaskSearch = ({ onFiltersChange, initialFilters = {} }: TaskSearchProps) =
             value={filters.boardId || ''}
             onChange={(e) => handleFilterChange('boardId', e.target.value || undefined)}
           >
-            <option value="">Todos los boards</option>
+            <option value="">All Boards</option>
             {boards.map((board) => (
               <option key={board.id} value={board.id}>
                 {board.name}
@@ -182,47 +184,47 @@ const TaskSearch = ({ onFiltersChange, initialFilters = {} }: TaskSearchProps) =
         </FilterGroup>
 
         <FilterGroup>
-          <Label>Prioridad</Label>
+          <Label>Priority</Label>
           <Select
             value={filters.priority || ''}
             onChange={(e) => handleFilterChange('priority', e.target.value || undefined)}
           >
-            <option value="">Todas las prioridades</option>
-            <option value="urgent">Urgente</option>
-            <option value="high">Alta</option>
-            <option value="medium">Media</option>
-            <option value="low">Baja</option>
+            <option value="">All Priorities</option>
+            <option value="urgent">Urgent</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
           </Select>
         </FilterGroup>
 
         <FilterGroup>
-          <Label>Ordenar por</Label>
+          <Label>Sort By</Label>
           <Select
             value={filters.sortBy || 'createdAt'}
             onChange={(e) => handleFilterChange('sortBy', e.target.value as SortOption)}
           >
-            <option value="createdAt">Fecha de creación</option>
-            <option value="dueDate">Fecha de vencimiento</option>
-            <option value="priority">Prioridad</option>
-            <option value="title">Título</option>
+            <option value="createdAt">Creation Date</option>
+            <option value="dueDate">Due Date</option>
+            <option value="priority">Priority</option>
+            <option value="title">Title</option>
           </Select>
         </FilterGroup>
 
         <FilterGroup>
-          <Label>Dirección</Label>
+          <Label>Direction</Label>
           <Select
             value={filters.sortDirection || 'desc'}
             onChange={(e) => handleFilterChange('sortDirection', e.target.value as SortDirection)}
           >
-            <option value="asc">Ascendente</option>
-            <option value="desc">Descendente</option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
           </Select>
         </FilterGroup>
       </SearchRow>
 
       <SearchRow>
         <FilterGroup>
-          <Label>Etiquetas (mantén Ctrl/Cmd para múltiple selección)</Label>
+          <Label>Tags (hold Ctrl/Cmd for multiple selection)</Label>
           <TagSelect
             multiple
             value={filters.tagIds || []}
@@ -237,7 +239,7 @@ const TaskSearch = ({ onFiltersChange, initialFilters = {} }: TaskSearchProps) =
         </FilterGroup>
 
         <FilterGroup>
-          <Label>Fecha desde</Label>
+          <Label>Start Date</Label>
           <DateInput
             type="date"
             value={filters.dueDateRange?.start || ''}
@@ -246,7 +248,7 @@ const TaskSearch = ({ onFiltersChange, initialFilters = {} }: TaskSearchProps) =
         </FilterGroup>
 
         <FilterGroup>
-          <Label>Fecha hasta</Label>
+          <Label>End Date</Label>
           <DateInput
             type="date"
             value={filters.dueDateRange?.end || ''}
@@ -255,21 +257,21 @@ const TaskSearch = ({ onFiltersChange, initialFilters = {} }: TaskSearchProps) =
         </FilterGroup>
 
         <FilterGroup>
-          <Label>Asignado a</Label>
+          <Label>Assigned To</Label>
           <Select
             value={filters.assigneeId || ''}
             onChange={(e) => handleFilterChange('assigneeId', e.target.value || undefined)}
             disabled
-            title="Funcionalidad preparada para multi-usuario"
+            title="Functionality prepared for multi-user"
           >
-            <option value="">Todos los usuarios</option>
+            <option value="">All Users</option>
           </Select>
         </FilterGroup>
       </SearchRow>
 
       <ButtonGroup>
         <Button variant="secondary" onClick={handleClearFilters}>
-          Limpiar filtros
+          Clear Filters
         </Button>
       </ButtonGroup>
     </SearchContainer>

@@ -45,7 +45,7 @@ export default function DeleteConfirmationModal({
   if (!isOpen) return null;
 
   return (
-    <ModalOverlay isOpen={isOpen} onClick={handleOverlayClick}>
+    <ModalOverlay $isOpen={isOpen} onClick={handleOverlayClick}>
       <UIModalContent size="sm" onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>{title}</ModalTitle>

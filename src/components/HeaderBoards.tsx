@@ -158,9 +158,9 @@ const HeaderBoards = ({
     <BoardHeader>
                 <Flex justify="between" align="center" style={{ flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <BoardTitle>{board?.name || 'Tablero de Proyectos'}</BoardTitle>
+                    <BoardTitle>{board?.name}</BoardTitle>
                     <BoardDescription>
-                      {board?.description || 'Gestiona tus tareas de forma visual y eficiente'}
+                      {board?.description}
                     </BoardDescription>
                   </div>
                   <Flex gap="md" align="center" style={{ flexShrink: 0 }}>
@@ -170,19 +170,19 @@ const HeaderBoards = ({
                       </DropdownButton>
                       <DropdownMenu $isOpen={isDropdownOpen}>
                         <DropdownItem onClick={handleOpenBoardConfigurationModal}>
-                          ⚙️ Configurar Tablero
+                          ⚙️ Board Settings
                         </DropdownItem>
                         <DropdownItem onClick={handleOpenManageTagsModal}>
-                          🏷️ Administrar Tags
+                          🏷️ Tags Setting
                         </DropdownItem>
                         <DropdownItem onClick={handleOpenDeleteBoardModal} $variant="danger">
-                          🗑️ Eliminar Tablero
+                          🗑️ Delete board
                         </DropdownItem>
                       </DropdownMenu>
                     </DropdownContainer>
                     <Button variant="primary" size="md"
                       onClick={handleOpenCreateTaskModal}>
-                      <span>➕</span> Nueva Tarea
+                      <span>➕</span> New Task
                     </Button>
                     <ThemeToggle />
                   </Flex>

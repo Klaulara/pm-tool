@@ -88,6 +88,7 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
     const allColumns = useColumnStore((state) => state.columns);
     const allTags = useTagStore((state) => state.tags);
     const moveTask = useTaskStore((state) => state.moveTask);
+    const reorderTasks = useTaskStore((state) => state.reorderTasks);
     const reorderColumns = useColumnStore((state) => state.reorderColumns);
     const updateColumn = useColumnStore((state) => state.updateColumn);
     const deleteColumn = useColumnStore((state) => state.deleteColumn);
@@ -101,7 +102,9 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
 
     const columns: ColumnWithTasks[] = storeColumns.map((col) => ({
         ...col,
-        tasks: tasks.filter((task) => task.status === col.status),
+        tasks: tasks
+            .filter((task) => task.status === col.status)
+            .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999)),
     }));
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -207,6 +210,29 @@ export default function BoardPage({ params }: { params: Promise<{ id: string }> 
             const columnIds = columns.map(col => col.id);
             const newColumnOrder = arrayMove(columnIds, activeColumnIndex, overColumnIndex);
             reorderColumns(boardId, newColumnOrder);
+            return;
+        }
+
+        // Check if we're reordering tasks within the same column
+        const activeTask = tasks.find((t) => t.id === activeId);
+        if (!activeTask) return;
+
+        // Find the column containing the active task
+        const activeColumn = columns.find((col) =>
+            col.tasks.some((task: Task) => task.id === activeId)
+        );
+        if (!activeColumn) return;
+
+        // Check if dropping over a task in the same column
+        const overTask = activeColumn.tasks.find((task: Task) => task.id === overId);
+        if (overTask && activeId !== overId) {
+            // Reorder tasks within the column
+            const oldIndex = activeColumn.tasks.findIndex((task: Task) => task.id === activeId);
+            const newIndex = activeColumn.tasks.findIndex((task: Task) => task.id === overId);
+
+            const taskIds = activeColumn.tasks.map((task: Task) => task.id);
+            const newTaskOrder = arrayMove(taskIds, oldIndex, newIndex);
+            reorderTasks(boardId, activeColumn.status, newTaskOrder);
         }
     };
 

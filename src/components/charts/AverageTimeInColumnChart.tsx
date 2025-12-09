@@ -49,7 +49,7 @@ export const AverageTimeInColumnChart = memo(function AverageTimeInColumnChart({
         labels: data.map((d) => d.column),
         datasets: [
           {
-            label: 'Promedio (horas)',
+            label: 'Hours (avg)',
             data: data.map((d) => d.averageHours),
             backgroundColor: data.map((d) => d.color + 'CC'),
             borderColor: data.map((d) => d.color),
@@ -99,7 +99,7 @@ export const AverageTimeInColumnChart = memo(function AverageTimeInColumnChart({
 
   return (
     <ChartContainer>
-      <ChartTitle>Tiempo Promedio en Cada Columna</ChartTitle>
+      <ChartTitle>Average Time in Each Column</ChartTitle>
       <CanvasWrapper>
         <canvas ref={canvasRef}></canvas>
       </CanvasWrapper>

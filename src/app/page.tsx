@@ -312,7 +312,7 @@ export default function Home() {
       const completed = filteredTasks.filter((t: Task) => t.completedAt?.startsWith(date)).length;
       
       // Format date for display
-      const displayDate = new Date(date).toLocaleDateString('es-ES', {
+      const displayDate = new Date(date).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
       });
@@ -337,10 +337,10 @@ export default function Home() {
       
       <DashboardHeader>
         <Title>Dashboard</Title>
-        <Subtitle>Resumen general de tus proyectos y tareas</Subtitle>
+        <Subtitle>General overview of your projects and tasks</Subtitle>
       </DashboardHeader>
 
-      <Suspense fallback={<LoadingPlaceholder>Cargando filtros...</LoadingPlaceholder>}>
+      <Suspense fallback={<LoadingPlaceholder>Loading filters...</LoadingPlaceholder>}>
         <DashboardFilters
           boards={boards}
           selectedBoard={selectedBoard}
@@ -354,23 +354,23 @@ export default function Home() {
       <StatsGrid>
         <StatCard>
           <StatValue>{stats.totalBoards}</StatValue>
-          <StatLabel>Tableros</StatLabel>
+          <StatLabel>Boards</StatLabel>
         </StatCard>
         <StatCard>
           <StatValue>{stats.totalTasks}</StatValue>
-          <StatLabel>Tareas Totales</StatLabel>
+          <StatLabel>Total Tasks</StatLabel>
         </StatCard>
         <StatCard>
           <StatValue>{stats.completedTasks}</StatValue>
-          <StatLabel>Tareas Completadas</StatLabel>
+          <StatLabel>Completed Tasks</StatLabel>
         </StatCard>
         <StatCard>
           <StatValue>{stats.completionRate}%</StatValue>
-          <StatLabel>Tasa de Completado</StatLabel>
+          <StatLabel>Completion Rate</StatLabel>
         </StatCard>
       </StatsGrid>
 
-      <Suspense fallback={<LoadingPlaceholder>Cargando métricas...</LoadingPlaceholder>}>
+      <Suspense fallback={<LoadingPlaceholder>Loading metrics...</LoadingPlaceholder>}>
         <WideChartContainer>
           <ProductivityMetrics
             completedToday={productivityMetrics.completedToday}
@@ -382,7 +382,7 @@ export default function Home() {
         </WideChartContainer>
       </Suspense>
 
-      <Suspense fallback={<LoadingPlaceholder>Cargando gráficos...</LoadingPlaceholder>}>
+      <Suspense fallback={<LoadingPlaceholder>Loading charts...</LoadingPlaceholder>}>
         <ChartsGrid>
           <TasksOverviewChart
             total={stats.totalTasks}

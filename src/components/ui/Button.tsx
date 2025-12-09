@@ -84,15 +84,15 @@ const buttonVariants = {
 
 const buttonSizes = {
   sm: css`
-    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.md};
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
     font-size: ${({ theme }) => theme.typography.fontSizes.sm};
-    min-height: 32px;
+    min-height: 44px;
   `,
 
   md: css`
     padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.lg};
     font-size: ${({ theme }) => theme.typography.fontSizes.md};
-    min-height: 40px;
+    min-height: 44px;
   `,
 
   lg: css`

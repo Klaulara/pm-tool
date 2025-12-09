@@ -159,7 +159,7 @@ const DeleteBoardModal = ({ isOpen, onClose, boardId, boardName }: DeleteBoardMo
         <ModalOverlay onClick={handleClose}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
-              <ModalTitle>Eliminar Tablero</ModalTitle>
+              <ModalTitle>Delete Board</ModalTitle>
               <ModalCloseButton onClick={handleClose}>×</ModalCloseButton>
             </ModalHeader>
             <ModalBody>
@@ -167,34 +167,34 @@ const DeleteBoardModal = ({ isOpen, onClose, boardId, boardName }: DeleteBoardMo
         <WarningBox>
           <WarningIcon>⚠️</WarningIcon>
           <WarningText>
-            <WarningTitle>¡Cuidado! Esta acción no se puede deshacer</WarningTitle>
+            <WarningTitle>Warning! This action cannot be undone</WarningTitle>
             <WarningDescription>
-              Al eliminar este tablero, se eliminarán permanentemente todas las columnas, 
-              tareas y datos asociados. Esta acción es irreversible.
+              Deleting this board will permanently remove all associated columns, 
+              tasks, and data. This action is irreversible.
             </WarningDescription>
           </WarningText>
         </WarningBox>
 
         <BoardInfoBox>
-          <BoardName>{board?.name || 'Tablero'}</BoardName>
-          <BoardDescription>{board?.description || 'Sin descripción'}</BoardDescription>
+          <BoardName>{board?.name || 'Board'}</BoardName>
+          <BoardDescription>{board?.description || 'No description'}</BoardDescription>
           <BoardStats>
             <Stat>
-              <strong>{totalColumns}</strong> columnas
+              <strong>{totalColumns}</strong> columns
             </Stat>
             <Stat>
-              <strong>{totalTasks}</strong> tareas
+              <strong>{totalTasks}</strong> tasks
             </Stat>
           </BoardStats>
         </BoardInfoBox>
 
         <ConfirmSection>
           <Label>
-            Por favor, escribe <strong>{boardName}</strong> para confirmar:
+            Please type <strong>{boardName}</strong> to confirm:
           </Label>
           <Input
             type="text"
-            placeholder={`Escribe "${boardName}" aquí`}
+            placeholder={`Type "${boardName}" here`}
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             disabled={isDeleting}
@@ -209,7 +209,7 @@ const DeleteBoardModal = ({ isOpen, onClose, boardId, boardName }: DeleteBoardMo
             onClick={handleClose}
             disabled={isDeleting}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button 
             variant="danger" 
@@ -217,7 +217,7 @@ const DeleteBoardModal = ({ isOpen, onClose, boardId, boardName }: DeleteBoardMo
             onClick={handleDelete}
             disabled={!canDelete || isDeleting}
           >
-            {isDeleting ? 'Eliminando...' : 'Eliminar Tablero'}
+            {isDeleting ? 'Deleting...' : 'Delete Board'}
           </Button>
         </FooterWrapper>
       </ModalContentWrapper>

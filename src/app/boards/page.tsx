@@ -74,13 +74,11 @@ const BoardsPage = () => {
                             setIsCreateModalOpen={setIsCreateModalOpen}
                         />
 
-                        <Grid columns={3} responsive gap="lg">
-                            {/* Create Board Card */}
+                        <Grid columns={3} $responsive gap="lg">
                             <div>
                                 <CreateBoard setIsCreateModalOpen={setIsCreateModalOpen} />
                             </div>
 
-                            {/* Board Cards */}
                             {filteredBoards.map((board: Board) => (
                                 <div key={board.id}>
                                     <BoardCardComponent
@@ -101,8 +99,8 @@ const BoardsPage = () => {
                                 }}
                             >
                                 <div style={{ fontSize: '64px', marginBottom: '16px' }}>🔍</div>
-                                <h3>No se encontraron tableros</h3>
-                                <p>Intenta con otra búsqueda o crea un nuevo tablero</p>
+                                <h3>No boards found</h3>
+                                <p>Try another search or create a new board</p>
                             </div>
                         )}
                     </div>

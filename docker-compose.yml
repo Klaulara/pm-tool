@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Next.js Development Server
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: pm-tool-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      # Prevent node_modules from being overwritten
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    command: npm run dev
+    restart: unless-stopped
+    networks:
+      - pm-tool-network
+
+  # Cypress for E2E Testing (optional, run on demand)
+  cypress:
+    build:
+      context: .
+      dockerfile: Dockerfile.cypress
+    container_name: pm-tool-cypress
+    depends_on:
+      - app
+    environment:
+      - CYPRESS_baseUrl=http://app:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # Run tests on demand, not automatically
+    profiles:
+      - testing
+    networks:
+      - pm-tool-network
+
+networks:
+  pm-tool-network:
+    driver: bridge

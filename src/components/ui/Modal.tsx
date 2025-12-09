@@ -23,7 +23,7 @@ const scaleIn = keyframes`
   }
 `;
 
-export const ModalOverlay = styled.div<{ isOpen?: boolean }>`
+export const ModalOverlay = styled.div<{ $isOpen?: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -31,7 +31,7 @@ export const ModalOverlay = styled.div<{ isOpen?: boolean }>`
   bottom: 0;
   background-color: ${({ theme }) => theme.colors.background.overlay};
   z-index: ${({ theme }) => theme.zIndex.modalBackdrop};
-  display: ${({ isOpen }) => (isOpen ? 'flex' : 'none')};
+  display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   ${flexCenter}
   animation: ${fadeIn} ${({ theme }) => `${theme.transitions.duration.normal} ${theme.transitions.easing.default}`};
   backdrop-filter: blur(4px);
@@ -87,8 +87,8 @@ export const ModalTitle = styled.h2`
 `;
 
 export const ModalCloseButton = styled.button`
-  width: 32px;
-  height: 32px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: ${({ theme }) => theme.borderRadius.md};
   display: flex;
   align-items: center;

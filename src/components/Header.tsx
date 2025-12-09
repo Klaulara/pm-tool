@@ -9,6 +9,7 @@ const PageHeader = styled.header`
   padding: ${({ theme }) => theme.spacing.xl} 0;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
   background-color: ${({ theme }) => theme.colors.background.primary};
+  padding: 0 0 0 0;
 `;
 
 const PageTitle = styled.h1`
@@ -25,25 +26,14 @@ const PageTitle = styled.h1`
   margin: 0 0 ${({ theme }) => theme.spacing.sm};
 `;
 
-const PageDescription = styled.p`
-  font-size: ${({ theme }) => theme.typography.fontSizes.lg};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin: 0;
-`;
-
 const Header: React.FC = () => {
 
   return (
     <PageHeader>
       <Container>
         <div>
-          <Flex justify="between" align="start">
-            <div>
-              <PageTitle>Sistema de Gestión de Proyectos</PageTitle>
-              <PageDescription>
-                Gestiona todos tus proyectos en un solo lugar
-              </PageDescription>
-            </div>
+          <Flex justify="between" align="center">
+            <PageTitle>Task Manager System</PageTitle>
             <ThemeToggle />
           </Flex>
         </div>

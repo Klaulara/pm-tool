@@ -50,6 +50,7 @@ export interface Task {
   subTasks: SubTask[];
   stimatedTime?: number;
   boardId: string;
+  order?: number;
   statusHistory?: { status: string; timestamp: string }[];
   assignee?: {
     id: string;

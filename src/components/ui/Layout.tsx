@@ -26,7 +26,7 @@ export const Container = styled.div<{ $maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'f
 export const Grid = styled.div<{
   columns?: number;
   gap?: 'sm' | 'md' | 'lg';
-  responsive?: boolean;
+  $responsive?: boolean;
 }>`
   display: grid;
   gap: ${({ theme, gap = 'md' }) => {
@@ -38,8 +38,8 @@ export const Grid = styled.div<{
     return gaps[gap];
   }};
 
-  ${({ columns = 1, responsive }) => {
-    if (responsive) {
+  ${({ columns = 1, $responsive }) => {
+    if ($responsive) {
       return `
         grid-template-columns: 1fr;
         

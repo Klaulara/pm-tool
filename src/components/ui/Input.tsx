@@ -6,19 +6,19 @@ import { focusVisible } from '@/styles/utils';
 interface InputProps {
   hasError?: boolean;
   size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
+  $fullWidth?: boolean;
 }
 
 const inputSizes = {
   sm: css`
-    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.sm};
     font-size: ${({ theme }) => theme.typography.fontSizes.sm};
-    min-height: 32px;
+    min-height: 44px;
   `,
   md: css`
     padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
     font-size: ${({ theme }) => theme.typography.fontSizes.md};
-    min-height: 40px;
+    min-height: 44px;
   `,
   lg: css`
     padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
@@ -28,7 +28,7 @@ const inputSizes = {
 };
 
 const inputBaseStyles = css<InputProps>`
-  width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
+  width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   font-family: ${({ theme }) => theme.typography.fonts.primary};
   font-weight: ${({ theme }) => theme.typography.fontWeights.regular};
   color: ${({ theme }) => theme.colors.text.primary};

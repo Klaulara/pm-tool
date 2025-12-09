@@ -95,7 +95,7 @@ export const TasksByStatusChart = memo(function TasksByStatusChart({ data }: Tas
 
   return (
     <ChartContainer>
-      <ChartTitle>Tareas por Estado</ChartTitle>
+      <ChartTitle>Tasks by Status</ChartTitle>
       <CanvasWrapper>
         <canvas ref={canvasRef}></canvas>
       </CanvasWrapper>

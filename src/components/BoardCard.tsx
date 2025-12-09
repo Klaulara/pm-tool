@@ -58,7 +58,7 @@ const BoardCardComponent = memo(function BoardCardComponent({ board, handleBoard
                 <Flex justify="between" align="start">
                     {board.isStarred && (
                         <Badge variant="warning" size="sm">
-                            ⭐ Favorito
+                            ⭐ Favorite
                         </Badge>
                     )}
                 </Flex>
@@ -73,11 +73,11 @@ const BoardCardComponent = memo(function BoardCardComponent({ board, handleBoard
                         <StatValue>{board.tasksCount.total}</StatValue>
                     </StatItem>
                     <StatItem>
-                        <StatLabel>Progreso</StatLabel>
+                        <StatLabel>In Progress</StatLabel>
                         <StatValue>{board.tasksCount.inProgress}</StatValue>
                     </StatItem>
                     <StatItem>
-                        <StatLabel>Completadas</StatLabel>
+                        <StatLabel>Completed</StatLabel>
                         <StatValue style={{ color: '#10B981' }}>
                             {board.tasksCount.completed}
                         </StatValue>
@@ -92,7 +92,7 @@ const BoardCardComponent = memo(function BoardCardComponent({ board, handleBoard
                                 color: 'var(--text-secondary)',
                             }}
                         >
-                            Progreso
+                            Progress
                         </span>
                         <span
                             style={{
@@ -128,7 +128,7 @@ const BoardCardComponent = memo(function BoardCardComponent({ board, handleBoard
                 <Flex justify="between" align="center" style={{ width: '100%' }}>
                     <Badge variant="default" size="sm">
                         📅{' '}
-                        {new Date(board.lastUpdated).toLocaleDateString('es-ES', {
+                        {new Date(board.lastUpdated).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                         })}

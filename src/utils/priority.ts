@@ -18,13 +18,13 @@ export const getPriorityColor = (priority: string): PriorityVariant => {
 export const getPriorityLabel = (priority: string): string => {
   switch (priority) {
     case 'urgent':
-      return 'Urgente';
+      return 'Urgent';
     case 'high':
-      return 'Alta';
+      return 'High';
     case 'medium':
-      return 'Media';
+      return 'Medium';
     case 'low':
-      return 'Baja';
+      return 'Low';
     default:
       return priority;
   }

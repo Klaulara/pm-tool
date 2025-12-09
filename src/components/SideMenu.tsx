@@ -4,30 +4,113 @@ import { useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import { useBoardStore } from '@/store/boards';
+import { useEscapeKey } from '@/hooks/useKeyboardNavigation';
 
-const SideMenuContainer = styled.aside<{ $isCollapsed: boolean }>`
+const SideMenuContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
   width: ${({ $isCollapsed }) => $isCollapsed ? '60px' : '280px'};
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  transition: width 0.3s ease;
+  background: linear-gradient(180deg, ${({ theme }) => theme.colors.background.secondary} 0%, ${({ theme }) => theme.colors.background.tertiary} 100%);
+  border-right: 1px solid ${({ theme }) => theme.colors.border.light};
+  transition: transform 0.3s ease, width 0.3s ease;
   z-index: ${({ theme }) => theme.zIndex.modal};
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    transform: translateY(${({ $isMobileOpen }) => $isMobileOpen ? '0' : '-100%'});
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+    left: 0;
+    right: 0;
+    z-index: ${({ theme }) => theme.zIndex.modal + 10};
+    border-right: none;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
+  }
+`;
+
+const MobileOverlay = styled.div<{ $isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: ${({ $isOpen }) => $isOpen ? 1 : 0};
+  visibility: ${({ $isOpen }) => $isOpen ? 'visible' : 'hidden'};
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: ${({ theme }) => theme.zIndex.modal + 5};
+  display: none;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: block;
+  }
+`;
+
+const HamburgerButton = styled.button`
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: ${({ theme }) => theme.zIndex.modal + 11};
+  background-color: ${({ theme }) => theme.colors.primary.main};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: ${({ theme }) => theme.spacing.sm};
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  box-shadow: ${({ theme }) => theme.shadows.md};
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary.dark};
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: flex;
+  }
+`;
+
+const HamburgerIcon = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 20px;
+
+  span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
 `;
 
 const MenuHeader = styled.div<{ $isCollapsed: boolean }>`
   padding: ${({ theme }) => theme.spacing.lg};
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
   display: flex;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => $isCollapsed ? 'center' : 'space-between'};
   min-height: 70px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    justify-content: center;
+  }
 `;
 
 const Logo = styled.div<{ $isCollapsed: boolean }>`
@@ -36,12 +119,18 @@ const Logo = styled.div<{ $isCollapsed: boolean }>`
   gap: ${({ theme }) => theme.spacing.sm};
   font-size: ${({ theme }) => theme.typography.fontSizes.xl};
   font-weight: ${({ theme }) => theme.typography.fontWeights.bold};
-  color: #ffffff;
+  color: ${({ theme }) => theme.colors.text.primary};
   white-space: nowrap;
   opacity: ${({ $isCollapsed }) => $isCollapsed ? 0 : 1};
   visibility: ${({ $isCollapsed }) => $isCollapsed ? 'hidden' : 'visible'};
   position: ${({ $isCollapsed }) => $isCollapsed ? 'absolute' : 'relative'};
   transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+  }
 `;
 
 const LogoIcon = styled.div`
@@ -55,7 +144,7 @@ const LogoIcon = styled.div`
 const ToggleButton = styled.button<{ $isCollapsed: boolean }>`
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: ${({ theme }) => theme.colors.text.secondary};
   cursor: pointer;
   padding: ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.borderRadius.md};
@@ -69,13 +158,17 @@ const ToggleButton = styled.button<{ $isCollapsed: boolean }>`
   z-index: 10;
   
   &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.primary};
     transform: scale(1.1);
   }
   
   &:active {
     transform: scale(0.95);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: none;
   }
 `;
 
@@ -96,12 +189,17 @@ const MenuContent = styled.div<{ $isCollapsed: boolean }>`
   }
   
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: ${({ theme }) => theme.colors.border.main};
     border-radius: ${({ theme }) => theme.borderRadius.full};
     
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: ${({ theme }) => theme.colors.border.dark};
     }
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    overflow-y: auto;
+    display: block;
   }
 `;
 
@@ -114,7 +212,7 @@ const SectionTitle = styled.div<{ $isCollapsed: boolean }>`
   padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.lg};
   font-size: ${({ theme }) => theme.typography.fontSizes.xs};
   font-weight: ${({ theme }) => theme.typography.fontWeights.semibold};
-  color: rgba(255, 255, 255, 0.5);
+  color: ${({ theme }) => theme.colors.text.tertiary};
   text-transform: uppercase;
   letter-spacing: 0.05em;
   opacity: ${({ $isCollapsed }) => $isCollapsed ? 0 : 1};
@@ -123,15 +221,21 @@ const SectionTitle = styled.div<{ $isCollapsed: boolean }>`
   overflow: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease, height 0.3s ease;
   white-space: nowrap;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    opacity: 1;
+    visibility: visible;
+    height: auto;
+  }
 `;
 
 const MenuItem = styled.button<{ $active?: boolean; $isCollapsed: boolean }>`
   width: 100%;
   padding: ${({ theme, $isCollapsed }) => $isCollapsed ? theme.spacing.sm : `${theme.spacing.sm} ${theme.spacing.lg}`};
-  background: ${({ $active }) => $active ? 'rgba(59, 130, 246, 0.15)' : 'none'};
+  background: ${({ $active, theme }) => $active ? theme.colors.primary.main + '26' : 'none'};
   border: none;
-  border-left: 3px solid ${({ $active }) => $active ? '#3b82f6' : 'transparent'};
-  color: ${({ $active }) => $active ? '#60a5fa' : 'rgba(255, 255, 255, 0.7)'};
+  border-left: 3px solid ${({ $active, theme }) => $active ? theme.colors.primary.main : 'transparent'};
+  color: ${({ $active, theme }) => $active ? theme.colors.primary.main : theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.typography.fontSizes.sm};
   font-weight: ${({ $active, theme }) => $active ? theme.typography.fontWeights.semibold : theme.typography.fontWeights.medium};
   cursor: pointer;
@@ -144,8 +248,8 @@ const MenuItem = styled.button<{ $active?: boolean; $isCollapsed: boolean }>`
   position: relative;
   
   &:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
@@ -168,6 +272,12 @@ const MenuText = styled.span<{ $isCollapsed: boolean }>`
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    opacity: 1;
+    visibility: visible;
+    width: auto;
+  }
 `;
 
 const BoardCount = styled.span<{ $isCollapsed: boolean }>`
@@ -179,6 +289,10 @@ const BoardCount = styled.span<{ $isCollapsed: boolean }>`
   font-weight: ${({ theme }) => theme.typography.fontWeights.semibold};
   opacity: ${({ $isCollapsed }) => $isCollapsed ? 0 : 1};
   transition: opacity 0.3s ease;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    opacity: 1;
+  }
 `;
 
 const StarIcon = styled.span<{ $isCollapsed: boolean }>`
@@ -188,9 +302,16 @@ const StarIcon = styled.span<{ $isCollapsed: boolean }>`
   transition: opacity 0.3s ease;
 `;
 
-const MenuFooter = styled.div`
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+const MenuFooter = styled.div<{ $isCollapsed: boolean }>`
+  margin-top: auto;
+  padding: ${({ theme }) => theme.spacing.md};
+  border-top: 1px solid ${({ theme }) => theme.colors.border.light};
+  background: ${({ theme }) => theme.colors.background.tertiary};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+    border-top: 1px solid ${({ theme }) => theme.colors.border.light};
+  }
 `;
 
 interface SideMenuProps {
@@ -200,6 +321,7 @@ interface SideMenuProps {
 
 export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMenuProps) => {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const boardsData = useBoardStore((state) => state.boards);
@@ -219,8 +341,20 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
     }
   };
 
+  const handleMobileToggle = () => {
+    setIsMobileOpen(!isMobileOpen);
+  };
+
+  const handleMobileClose = () => {
+    setIsMobileOpen(false);
+  };
+
+  // Close mobile menu on Escape key
+  useEscapeKey(handleMobileClose, isMobileOpen);
+
   const handleNavigate = (path: string) => {
     router.push(path);
+    handleMobileClose(); // Close mobile menu on navigation
   };
 
   const isActive = (path: string) => pathname === path;
@@ -231,13 +365,38 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
   const regularBoards = boards.filter((board) => !board.isStarred);
 
   return (
-    <SideMenuContainer $isCollapsed={isCollapsed}>
-      <MenuHeader $isCollapsed={isCollapsed}>
+    <>
+      <HamburgerButton onClick={handleMobileToggle} aria-label="Toggle menu">
+        <HamburgerIcon>
+          <span />
+          <span />
+          <span />
+        </HamburgerIcon>
+      </HamburgerButton>
+
+      <MobileOverlay 
+        $isOpen={isMobileOpen} 
+        onClick={handleMobileClose}
+        aria-hidden="true"
+      />
+
+      <SideMenuContainer 
+        $isCollapsed={isCollapsed} 
+        $isMobileOpen={isMobileOpen}
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        <MenuHeader $isCollapsed={isCollapsed}>
         <Logo $isCollapsed={isCollapsed}>
-          <LogoIcon>📋</LogoIcon>
-          PM Tool
+          <LogoIcon aria-hidden="true">📋</LogoIcon>
+          Task Manager
         </Logo>
-        <ToggleButton onClick={handleToggle} $isCollapsed={isCollapsed} title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}>
+        <ToggleButton 
+          onClick={handleToggle} 
+          $isCollapsed={isCollapsed} 
+          aria-label={isCollapsed ? 'Expand menu' : 'Collapse menu'}
+          aria-expanded={!isCollapsed}
+        >
           {isCollapsed ? '»' : '«'}
         </ToggleButton>
       </MenuHeader>
@@ -259,7 +418,7 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
             onClick={() => handleNavigate('/boards')}
           >
             <MenuIcon>📊</MenuIcon>
-            <MenuText $isCollapsed={isCollapsed}>Todos los Tableros</MenuText>
+            <MenuText $isCollapsed={isCollapsed}>All Boards</MenuText>
             {!isCollapsed && <BoardCount $isCollapsed={isCollapsed}>{boards.length}</BoardCount>}
           </MenuItem>
 
@@ -267,25 +426,46 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
             $active={isActive('/tasks')}
             $isCollapsed={isCollapsed}
             onClick={() => handleNavigate('/tasks')}
+            role="menuitem"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleNavigate('/tasks');
+              }
+            }}
           >
-            <MenuIcon>✅</MenuIcon>
-            <MenuText $isCollapsed={isCollapsed}>Todas las Tareas</MenuText>
+            <MenuIcon aria-hidden="true">✅</MenuIcon>
+            <MenuText $isCollapsed={isCollapsed}>All Tasks</MenuText>
           </MenuItem>
         </MenuSection>
 
         {starredBoards.length > 0 && (
-          <MenuSection $isCollapsed={isCollapsed}>
-            <SectionTitle $isCollapsed={isCollapsed}>Favoritos</SectionTitle>
+          <MenuSection 
+            $isCollapsed={isCollapsed}
+            role="menu"
+            aria-label="Favorite boards"
+          >
+            <SectionTitle $isCollapsed={isCollapsed}>Favorites</SectionTitle>
             {starredBoards.map((board) => (
               <MenuItem
                 key={board.id}
                 $active={isBoardActive(board.id)}
                 $isCollapsed={isCollapsed}
                 onClick={() => handleNavigate(`/boards/${board.id}`)}
+                role="menuitem"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleNavigate(`/boards/${board.id}`);
+                  }
+                }}
+                aria-label={`${board.name} board (favorite)`}
               >
-                <MenuIcon>📋</MenuIcon>
+                <MenuIcon aria-hidden="true">📋</MenuIcon>
                 <MenuText $isCollapsed={isCollapsed}>{board.name}</MenuText>
-                {!isCollapsed && <StarIcon $isCollapsed={isCollapsed}>⭐</StarIcon>}
+                {!isCollapsed && <StarIcon $isCollapsed={isCollapsed} aria-label="Starred">⭐</StarIcon>}
               </MenuItem>
             ))}
           </MenuSection>
@@ -293,7 +473,7 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
 
         {regularBoards.length > 0 && (
           <MenuSection $isCollapsed={isCollapsed}>
-            <SectionTitle $isCollapsed={isCollapsed}>Tableros</SectionTitle>
+            <SectionTitle $isCollapsed={isCollapsed}>Boards</SectionTitle>
             {regularBoards.slice(0, 10).map((board) => (
               <MenuItem
                 key={board.id}
@@ -309,12 +489,17 @@ export const SideMenu = ({ isCollapsed: controlledCollapsed, onToggle }: SideMen
         )}
       </MenuContent>
 
-      <MenuFooter>
-        <MenuItem $isCollapsed={isCollapsed} onClick={() => {}}>
-          <MenuIcon>⚙️</MenuIcon>
-          <MenuText $isCollapsed={isCollapsed}>Configuración</MenuText>
-        </MenuItem>
+      <MenuFooter $isCollapsed={isCollapsed}>
+        <MenuItem
+            $active={isActive('/settings')}
+            $isCollapsed={isCollapsed}
+            onClick={() => handleNavigate('/settings')}
+          >
+            <MenuIcon>⚙️</MenuIcon>
+            <MenuText $isCollapsed={isCollapsed}>Settings</MenuText>
+          </MenuItem>
       </MenuFooter>
     </SideMenuContainer>
+    </>
   );
 };

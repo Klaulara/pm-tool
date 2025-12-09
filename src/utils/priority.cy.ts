@@ -31,20 +31,20 @@ describe('Priority Utilities', () => {
   })
 
   describe('getPriorityLabel', () => {
-    it('returns "Urgente" for urgent priority', () => {
-      expect(getPriorityLabel('urgent')).to.equal('Urgente')
+    it('returns "Urgent" for urgent priority', () => {
+      expect(getPriorityLabel('urgent')).to.equal('Urgent')
     })
 
-    it('returns "Alta" for high priority', () => {
-      expect(getPriorityLabel('high')).to.equal('Alta')
+    it('returns "High" for high priority', () => {
+      expect(getPriorityLabel('high')).to.equal('High')
     })
 
-    it('returns "Media" for medium priority', () => {
-      expect(getPriorityLabel('medium')).to.equal('Media')
+    it('returns "Medium" for medium priority', () => {
+      expect(getPriorityLabel('medium')).to.equal('Medium')
     })
 
-    it('returns "Baja" for low priority', () => {
-      expect(getPriorityLabel('low')).to.equal('Baja')
+    it('returns "Low" for low priority', () => {
+      expect(getPriorityLabel('low')).to.equal('Low')
     })
 
     it('returns the original value for unknown priority', () => {
@@ -60,10 +60,10 @@ describe('Priority Utilities', () => {
 
     it('returns correct Spanish translations for all valid priorities', () => {
       const priorities = [
-        { input: 'urgent', expected: 'Urgente' },
-        { input: 'high', expected: 'Alta' },
-        { input: 'medium', expected: 'Media' },
-        { input: 'low', expected: 'Baja' }
+        { input: 'urgent', expected: 'Urgent' },
+        { input: 'high', expected: 'High' },
+        { input: 'medium', expected: 'Medium' },
+        { input: 'low', expected: 'Low' }
       ]
 
       priorities.forEach(({ input, expected }) => {

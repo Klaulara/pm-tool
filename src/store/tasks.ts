@@ -12,6 +12,7 @@ interface TaskActions {
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   moveTask: (taskId: string, newStatus: Task['status']) => void;
+  reorderTasks: (boardId: string, status: Task['status'], taskIds: string[]) => void;
   addSubTask: (taskId: string, title: string) => void;
   toggleSubTask: (taskId: string, subTaskId: string) => void;
   deleteSubTask: (taskId: string, subTaskId: string) => void;
@@ -23,72 +24,135 @@ interface TaskActions {
 
 type TaskStore = TaskState & TaskActions;
 
+// Helper function to calculate task counts for a board
+export const calculateTaskCounts = (boardTasks: Task[]) => {
+  const total = boardTasks.filter((t) => t.status !== 'archive').length;
+  const completed = boardTasks.filter((t) => t.status === 'done').length;
+  const inProgress = boardTasks.filter((t) => 
+    t.status !== 'todo' && 
+    t.status !== 'done' && 
+    t.status !== 'archive'
+  ).length;
+  
+  return { total, completed, inProgress };
+};
+
+// Helper function to determine if a status counts as "inProgress"
+const isInProgressStatus = (status: Task['status']) => {
+  return status !== 'todo' && status !== 'done' && status !== 'archive';
+};
+
+// Helper function to calculate delta when status changes
+const calculateStatusDelta = (oldStatus: Task['status'], newStatus: Task['status']) => {
+  const delta: { total?: number; completed?: number; inProgress?: number } = {};
+  
+  // Handle archive status changes
+  if (oldStatus === 'archive' && newStatus !== 'archive') {
+    delta.total = 1;
+  } else if (oldStatus !== 'archive' && newStatus === 'archive') {
+    delta.total = -1;
+  }
+  
+  // Handle completed status changes
+  if (oldStatus === 'done' && newStatus !== 'done') {
+    delta.completed = -1;
+  } else if (oldStatus !== 'done' && newStatus === 'done') {
+    delta.completed = 1;
+  }
+  
+  // Handle inProgress status changes
+  const wasInProgress = isInProgressStatus(oldStatus);
+  const isNowInProgress = isInProgressStatus(newStatus);
+  
+  if (wasInProgress && !isNowInProgress) {
+    delta.inProgress = -1;
+  } else if (!wasInProgress && isNowInProgress) {
+    delta.inProgress = 1;
+  }
+  
+  return delta;
+};
+
+
 // Initial data
-const initialTasks: Task[] = [
+export const initialTasks: Task[] = [
   {
     id: 'task-1',
-    title: 'Implementar persistencia de datos',
-    description: 'Usar localStorage para guardar el estado de la aplicacion',
+    title: 'Implement localStorage persistence',
+    description: 'Use localStorage to save the application state',
     priority: 'high',
-    dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    dueDate: '2025-12-10T23:59:59.000Z',
     status: 'todo',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: '2025-12-01T10:00:00.000Z',
+    updatedAt: '2025-12-08T10:00:00.000Z',
     subTasks: [],
     boardId: '1',
   },
   {
     id: 'task-2',
-    title: 'Diseñar interfaz de usuario',
-    description: 'Crear wireframes y mockups para la aplicacion',
+    title: 'Design user interface',
+    description: 'Create wireframes and mockups for the application',
     priority: 'medium',
     status: 'inProgress',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: '2025-12-01T10:00:00.000Z',
+    updatedAt: '2025-12-07T10:00:00.000Z',
     subTasks: [],
     boardId: '1',
   },
   {
     id: 'task-3',
-    title: 'Configurar entorno de desarrollo',
-    description: 'Instalar dependencias y configurar herramientas necesarias',
+    title: 'Set up development environment',
+    description: 'Install dependencies and configure necessary tools',
     priority: 'low',
     status: 'done',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: '2025-12-01T10:00:00.000Z',
+    updatedAt: '2025-12-07T10:00:00.000Z',
+    completedAt: '2025-12-07T10:00:00.000Z',
     subTasks: [
       {
         id: 'subtask-1',
         title: 'Instalar dependencias',
         completed: true,
-        createdAt: new Date().toISOString(),
+         createdAt: '2025-12-01T10:00:00.000Z',
       },
       {
         id: 'subtask-2',
         title: 'Configurar linter',
         completed: true,
-        createdAt: new Date().toISOString(),
+         createdAt: '2025-12-01T10:00:00.000Z',
       },
       {
         id: 'subtask-3',
         title: 'Configurar zustand',
-        completed: false,
-        createdAt: new Date().toISOString(),
+        completed: true,
+        createdAt: '2025-12-01T10:00:00.000Z',
       },
     ],
     boardId: '1',
   },
   {
     id: 'task-4',
-    title: 'Escribir documentacion',
-    description: 'Crear documentacion para el uso y desarrollo del proyecto',
+    title: 'Write documentation',
+    description: 'Create documentation for the use and development of the project',
     priority: 'urgent',
     status: 'todo',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: '2025-12-01T10:00:00.000Z',
+    updatedAt: '2025-12-08T10:00:00.000Z',
     subTasks: [],
     boardId: '1',
   },
+  {
+    id: 'task-5',
+    title: 'Write unit tests',
+    description: 'Write and run unit tests for the main components',
+    priority: 'high',
+    status: 'done',
+    createdAt: '2025-12-01T10:00:00.000Z',
+    updatedAt: '2025-12-07T10:00:00.000Z',
+    completedAt: '2025-12-07T10:00:00.000Z',
+    subTasks: [],
+    boardId: '1',
+  }
 ];
 
 export const useTaskStore = create<TaskStore>()(
@@ -99,9 +163,16 @@ export const useTaskStore = create<TaskStore>()(
 
       // Actions
       addTask: (taskData) => {
+        // Get next task number
+        const existingTasks = get().tasks;
+        const taskNumbers = existingTasks
+          .map(t => parseInt(t.id.split('-')[1]))
+          .filter(num => !isNaN(num));
+        const nextTaskNumber = taskNumbers.length > 0 ? Math.max(...taskNumbers) + 1 : 1;
+
         const newTask: Task = {
           ...taskData,
-          id: `task-${Date.now()}`,
+          id: `task-${nextTaskNumber}`,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           subTasks: taskData.subTasks || [],
@@ -117,17 +188,39 @@ export const useTaskStore = create<TaskStore>()(
       },
 
       updateTask: (id, taskData) => {
+        const task = get().tasks.find((t) => t.id === id);
+        if (!task) return;
+
+        const oldStatus = task.status;
+        const newStatus = taskData.status;
+        const now = new Date().toISOString();
+
         set((state) => ({
-          tasks: state.tasks.map((task) =>
-            task.id === id
+          tasks: state.tasks.map((t) =>
+            t.id === id
               ? {
-                  ...task,
+                  ...t,
                   ...taskData,
-                  updatedAt: new Date().toISOString(),
+                  updatedAt: now,
+                  completedAt: newStatus === 'done' ? now : t.completedAt,
+                  statusHistory:
+                    newStatus && newStatus !== oldStatus
+                      ? [
+                          ...(t.statusHistory || []),
+                          { status: newStatus, timestamp: now },
+                        ]
+                      : t.statusHistory || [],
                 }
-              : task
+              : t
           ),
         }));
+
+        // Update board counts if status changed
+        if (newStatus && newStatus !== oldStatus) {
+          const delta = calculateStatusDelta(oldStatus, newStatus);
+          const updateBoardTaskCount = useBoardStore.getState().updateBoardTaskCount;
+          updateBoardTaskCount(task.boardId, delta);
+        }
       },
 
       deleteTask: (id) => {
@@ -168,12 +261,19 @@ export const useTaskStore = create<TaskStore>()(
         }));
 
         // Update board counts
+        const delta = calculateStatusDelta(oldStatus, newStatus);
         const updateBoardTaskCount = useBoardStore.getState().updateBoardTaskCount;
-        if (oldStatus === 'done' && newStatus !== 'done') {
-          updateBoardTaskCount(task.boardId, { completed: -1 });
-        } else if (oldStatus !== 'done' && newStatus === 'done') {
-          updateBoardTaskCount(task.boardId, { completed: 1 });
-        }
+        updateBoardTaskCount(task.boardId, delta);
+      },
+
+      reorderTasks: (boardId, status, taskIds) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) => {
+            if (task.boardId !== boardId || task.status !== status) return task;
+            const newOrder = taskIds.indexOf(task.id);
+            return newOrder !== -1 ? { ...task, order: newOrder } : task;
+          }),
+        }));
       },
 
       addSubTask: (taskId, title) => {

@@ -4,6 +4,11 @@ describe('BoardStore - State Management', () => {
   // No intentamos limpiar el store, solo trabajamos con el estado actual
   
   describe('Board Actions', () => {
+    beforeEach(() => {
+      // Reset store to clean state before each test
+      useBoardStore.getState().resetStore()
+    })
+
     it('adds a new board', () => {
       const store = useBoardStore.getState()
       const initialCount = store.boards.length
@@ -118,6 +123,9 @@ describe('BoardStore - State Management', () => {
     let testBoardId: string
 
     beforeEach(() => {
+      // Reset store to clean state before each test
+      useBoardStore.getState().resetStore()
+      
       // Add a fresh board for each task test
       const store = useBoardStore.getState()
       store.addBoard({
@@ -301,6 +309,9 @@ describe('BoardStore - State Management', () => {
     let testTaskId: string
 
     beforeEach(() => {
+      // Reset store to clean state before each test
+      useBoardStore.getState().resetStore()
+      
       const store = useBoardStore.getState()
       store.addBoard({
         name: 'SubTask Test Board ' + Date.now(),
@@ -404,6 +415,9 @@ describe('BoardStore - State Management', () => {
     let testBoardId: string
 
     beforeEach(() => {
+      // Reset store to clean state before each test
+      useBoardStore.getState().resetStore()
+      
       const store = useBoardStore.getState()
       store.addBoard({
         name: 'Column Test Board ' + Date.now(),
@@ -490,6 +504,11 @@ describe('BoardStore - State Management', () => {
   })
 
   describe('Tag Actions', () => {
+    beforeEach(() => {
+      // Reset store to clean state before each test
+      useBoardStore.getState().resetStore()
+    })
+
     it('adds a new tag', () => {
       const store = useBoardStore.getState()
       const initialCount = store.tags.length

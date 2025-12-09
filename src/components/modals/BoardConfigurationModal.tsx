@@ -23,36 +23,36 @@ interface CreateBoardModalProps {
 
 const BoardConfigurationModal = ({ isCreateModalOpen, setIsCreateModalOpen, newBoardName, setNewBoardName, newBoardDescription, setNewBoardDescription, isStarred, setIsStarred, handleEditBoard }: CreateBoardModalProps) => {
     return (
-        <ModalOverlay isOpen={isCreateModalOpen} onClick={() => setIsCreateModalOpen(false)}>
+        <ModalOverlay $isOpen={isCreateModalOpen} onClick={() => setIsCreateModalOpen(false)}>
             <ModalContent size="md" onClick={(e) => e.stopPropagation()}>
                 <ModalHeader>
-                    <ModalTitle>Configurar Tablero</ModalTitle>
+                    <ModalTitle>Configure Board</ModalTitle>
                     <ModalCloseButton onClick={() => setIsCreateModalOpen(false)}>✕</ModalCloseButton>
                 </ModalHeader>
 
                 <ModalBody>
                     <FormGroup>
-                        <Label htmlFor="board-name">Nombre del Tablero *</Label>
+                        <Label htmlFor="board-name">Board Name *</Label>
                         <Input
                             id="board-name"
                             type="text"
-                            placeholder="Ej: Desarrollo Web"
+                            placeholder="E.g., Web Development"
                             value={newBoardName}
                             onChange={(e) => setNewBoardName(e.target.value)}
-                            fullWidth
+                            $fullWidth
                             autoFocus
                         />
                     </FormGroup>
 
                     <FormGroup>
-                        <Label htmlFor="board-description">Descripción</Label>
+                        <Label htmlFor="board-description">Description</Label>
                         <Input
                             id="board-description"
                             type="text"
-                            placeholder="Breve descripción del tablero"
+                            placeholder="Brief description of the board"
                             value={newBoardDescription}
                             onChange={(e) => setNewBoardDescription(e.target.value)}
-                            fullWidth
+                            $fullWidth
                         />
                     </FormGroup>
 
@@ -66,7 +66,7 @@ const BoardConfigurationModal = ({ isCreateModalOpen, setIsCreateModalOpen, newB
                             />
                             <CheckboxLabel>
                                 <StarIcon $isStarred={isStarred}>⭐</StarIcon>
-                                Marcar como favorito
+                                Mark as favorite
                             </CheckboxLabel>
                         </CheckboxWrapper>
                     </FormGroup>
@@ -78,7 +78,7 @@ const BoardConfigurationModal = ({ isCreateModalOpen, setIsCreateModalOpen, newB
                         onClick={() => setIsCreateModalOpen(false)}
                         type="button"
                     >
-                        Cancelar
+                        Cancel
                     </Button>
                     <Button
                         variant="primary"
@@ -86,7 +86,7 @@ const BoardConfigurationModal = ({ isCreateModalOpen, setIsCreateModalOpen, newB
                         disabled={!newBoardName.trim()}
                         type="button"
                     >
-                        Editar Tablero
+                        Edit Board
                     </Button>
                 </ModalFooter>
             </ModalContent>

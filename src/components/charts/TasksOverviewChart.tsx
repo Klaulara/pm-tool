@@ -50,7 +50,7 @@ export const TasksOverviewChart = memo(function TasksOverviewChart({ total, comp
     const config: ChartConfiguration = {
       type: 'doughnut',
       data: {
-        labels: ['Por Hacer', 'En Progreso', 'Completadas'],
+        labels: ['To Do', 'In Progress', 'Completed'],
         datasets: [
           {
             data: [todo, inProgress, completed],
@@ -107,7 +107,7 @@ export const TasksOverviewChart = memo(function TasksOverviewChart({ total, comp
 
   return (
     <ChartContainer>
-      <ChartTitle>Resumen de Tareas</ChartTitle>
+      <ChartTitle>Tasks Overview</ChartTitle>
       <CanvasWrapper>
         <canvas ref={canvasRef}></canvas>
       </CanvasWrapper>

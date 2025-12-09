@@ -15,7 +15,7 @@ const CreateColumnModal = ({ isCreateModalOpen, setIsCreateModalOpen, newColumnN
     const isValidName = newColumnName.trim().length >= 2 && newColumnName.trim().length <= 50;
     
     return (
-        <ModalOverlay isOpen={isCreateModalOpen} onClick={() => setIsCreateModalOpen(false)}>
+        <ModalOverlay $isOpen={isCreateModalOpen} onClick={() => setIsCreateModalOpen(false)}>
             <ModalContent size="md" onClick={(e) => e.stopPropagation()}>
                 <ModalHeader>
                     <ModalTitle>Create new column</ModalTitle>
@@ -31,7 +31,7 @@ const CreateColumnModal = ({ isCreateModalOpen, setIsCreateModalOpen, newColumnN
                             placeholder="e.g., Development"
                             value={newColumnName}
                             onChange={(e) => setNewColumnName(e.target.value)}
-                            fullWidth
+                            $fullWidth
                             autoFocus
                             maxLength={50}
                         />
@@ -50,7 +50,7 @@ const CreateColumnModal = ({ isCreateModalOpen, setIsCreateModalOpen, newColumnN
                             placeholder="Brief description of the column"
                             value={newColumnColor}
                             onChange={(e) => setNewColumnColor(e.target.value)}
-                            fullWidth
+                            $fullWidth
                         />
                     </FormGroup>
                 </ModalBody>

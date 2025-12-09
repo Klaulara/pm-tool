@@ -13,15 +13,15 @@ const SearchBar = ({ searchQuery, setSearchQuery, setIsCreateModalOpen }: Search
             <div style={{ flex: 1 }}>
                 <Input
                     type="text"
-                    placeholder="🔍 Buscar tableros..."
+                    placeholder="🔍 Find boards..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    fullWidth
+                    $fullWidth
                     size="lg"
                 />
             </div>
             <Button variant="primary" size="lg" onClick={() => setIsCreateModalOpen(true)}>
-                <span>➕</span> Nuevo Tablero
+                <span>➕</span> New Board
             </Button>
         </Flex>
 

@@ -74,12 +74,12 @@ export const DashboardFilters = memo(function DashboardFilters({
 }: DashboardFiltersProps) {
   return (
     <FiltersContainer>
-      <FiltersTitle>Filtros</FiltersTitle>
+      <FiltersTitle>Filters</FiltersTitle>
       <FiltersGrid>
         <FilterGroup>
-          <Label>Tablero</Label>
+          <Label>Board</Label>
           <Select value={selectedBoard} onChange={(e) => onBoardChange(e.target.value)}>
-            <option value="all">Todos los Tableros</option>
+            <option value="all">All Boards</option>
             {boards.map((board) => (
               <option key={board.id} value={board.id}>
                 {board.name}
@@ -88,7 +88,7 @@ export const DashboardFilters = memo(function DashboardFilters({
           </Select>
         </FilterGroup>
         <FilterGroup>
-          <Label>Fecha Inicio</Label>
+          <Label>Start Date</Label>
           <Input
             type="date"
             value={dateRange.start}
@@ -98,7 +98,7 @@ export const DashboardFilters = memo(function DashboardFilters({
           />
         </FilterGroup>
         <FilterGroup>
-          <Label>Fecha Fin</Label>
+          <Label>End Date</Label>
           <Input
             type="date"
             value={dateRange.end}
@@ -109,7 +109,7 @@ export const DashboardFilters = memo(function DashboardFilters({
         </FilterGroup>
         <FilterGroup>
           <Button variant="secondary" onClick={onReset}>
-            Limpiar Filtros
+            Clear Filters
           </Button>
         </FilterGroup>
       </FiltersGrid>

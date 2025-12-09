@@ -1,6 +1,7 @@
 import React from 'react';
 import { ModalOverlay, ModalContent, ModalHeader, ModalTitle, ModalCloseButton, ModalBody, ModalFooter } from '../ui/Modal';
-import { FormGroup, Label, Input, Button } from '../ui'
+import { FormGroup, Label, Input, Button } from '../ui';
+import { useFocusTrap, useEscapeKey } from '@/hooks/useKeyboardNavigation';
 
 interface CreateBoardModalProps {
     isCreateModalOpen: boolean;
@@ -13,37 +14,70 @@ interface CreateBoardModalProps {
 }
 
 const CreateBoardModal = ({ isCreateModalOpen, setIsCreateModalOpen, newBoardName, setNewBoardName, newBoardDescription, setNewBoardDescription, handleCreateBoard }: CreateBoardModalProps) => {
+    const modalRef = useFocusTrap(isCreateModalOpen);
+    
+    useEscapeKey(() => setIsCreateModalOpen(false), isCreateModalOpen);
+
+    const handleSubmit = () => {
+        if (newBoardName.trim()) {
+            handleCreateBoard();
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey && newBoardName.trim()) {
+            e.preventDefault();
+            handleSubmit();
+        }
+    };
+
     return (
-        <ModalOverlay isOpen={isCreateModalOpen} onClick={() => setIsCreateModalOpen(false)}>
-            <ModalContent size="md" onClick={(e) => e.stopPropagation()}>
+        <ModalOverlay 
+            $isOpen={isCreateModalOpen} 
+            onClick={() => setIsCreateModalOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-board-title"
+        >
+            <ModalContent 
+                ref={modalRef}
+                size="md" 
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={handleKeyPress}
+            >
                 <ModalHeader>
-                    <ModalTitle>Crear Nuevo Tablero</ModalTitle>
-                    <ModalCloseButton onClick={() => setIsCreateModalOpen(false)}>✕</ModalCloseButton>
+                    <ModalTitle id="create-board-title">Create new Board</ModalTitle>
+                    <ModalCloseButton 
+                        onClick={() => setIsCreateModalOpen(false)}
+                        aria-label="Close modal"
+                    >
+                        ✕
+                    </ModalCloseButton>
                 </ModalHeader>
 
                 <ModalBody>
                     <FormGroup>
-                        <Label htmlFor="board-name">Nombre del Tablero *</Label>
+                        <Label htmlFor="board-name">Board Name *</Label>
                         <Input
                             id="board-name"
                             type="text"
-                            placeholder="Ej: Desarrollo Web"
+                            placeholder="E.g., Web Development"
                             value={newBoardName}
                             onChange={(e) => setNewBoardName(e.target.value)}
-                            fullWidth
+                            $fullWidth
                             autoFocus
                         />
                     </FormGroup>
 
                     <FormGroup>
-                        <Label htmlFor="board-description">Descripción</Label>
+                        <Label htmlFor="board-description">Description</Label>
                         <Input
                             id="board-description"
                             type="text"
-                            placeholder="Breve descripción del tablero"
+                            placeholder="Brief description of the board"
                             value={newBoardDescription}
                             onChange={(e) => setNewBoardDescription(e.target.value)}
-                            fullWidth
+                            $fullWidth
                         />
                     </FormGroup>
                 </ModalBody>
@@ -54,7 +88,7 @@ const CreateBoardModal = ({ isCreateModalOpen, setIsCreateModalOpen, newBoardNam
                         onClick={() => setIsCreateModalOpen(false)}
                         type="button"
                     >
-                        Cancelar
+                        Cancel
                     </Button>
                     <Button
                         variant="primary"
@@ -62,7 +96,7 @@ const CreateBoardModal = ({ isCreateModalOpen, setIsCreateModalOpen, newBoardNam
                         disabled={!newBoardName.trim()}
                         type="button"
                     >
-                        Crear Tablero
+                        Create Board
                     </Button>
                 </ModalFooter>
             </ModalContent>

@@ -6,6 +6,7 @@ import { FormGroup, Label, Input, Button, Select, Badge } from '../ui';
 import { useTaskStore } from '@/store/tasks';
 import { useTagStore } from '@/store/tags';
 import type { Task, Tag } from '@/types/store';
+import { useFocusTrap, useEscapeKey } from '@/hooks/useKeyboardNavigation';
 
 const TabContainer = styled.div`
   display: flex;
@@ -301,14 +302,17 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ isOpen, onClose, ta
     deleteSubTask(task.id, subTaskId);
   };
 
+  const modalRef = useFocusTrap(isOpen);
+  useEscapeKey(onClose, isOpen);
+
   if (!isOpen) return null;
 
   return (
-    <ModalOverlay onClick={onClose}>
-      <ModalContent onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+    <ModalOverlay onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="task-details-title">
+      <ModalContent ref={modalRef} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
         <ModalHeader>
-          <ModalTitle>Task Details</ModalTitle>
-          <ModalCloseButton onClick={onClose}>&times;</ModalCloseButton>
+          <ModalTitle id="task-details-title">Task Details</ModalTitle>
+          <ModalCloseButton onClick={onClose} aria-label="Close task details">&times;</ModalCloseButton>
         </ModalHeader>
 
         <ModalBody>

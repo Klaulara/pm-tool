@@ -203,21 +203,21 @@ const ManageTagsModal = ({ isOpen, onClose }: ManageTagsModalProps) => {
         <ModalOverlay onClick={onClose}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
-              <ModalTitle>Administrar Tags</ModalTitle>
+              <ModalTitle>Tags setting</ModalTitle>
               <ModalCloseButton onClick={onClose}>×</ModalCloseButton>
             </ModalHeader>
             <ModalBody>
               <ContentWrapper>
         <Section>
-          <SectionTitle>Crear Nuevo Tag</SectionTitle>
+          <SectionTitle>Create new tag</SectionTitle>
           <CreateTagForm>
             <FormRow>
               <InputGroup style={{ flex: 2 }}>
-                <Label htmlFor="tag-name">Nombre</Label>
+                <Label htmlFor="tag-name">Name</Label>
                 <Input
                   id="tag-name"
                   type="text"
-                  placeholder="Nombre del tag..."
+                  placeholder="Tag name..."
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
                   onKeyDown={(e) => {
@@ -237,18 +237,18 @@ const ManageTagsModal = ({ isOpen, onClose }: ManageTagsModalProps) => {
                 />
               </InputGroup>
               <Button variant="primary" size="md" onClick={handleCreateTag}>
-                Crear Tag
+                Create tag
               </Button>
             </FormRow>
           </CreateTagForm>
         </Section>
 
         <Section>
-          <SectionTitle>Tags Existentes ({tags.length})</SectionTitle>
+          <SectionTitle>Tags ({tags.length})</SectionTitle>
           <TagsList>
             {tags.length === 0 ? (
               <EmptyState>
-                No hay tags creados. Crea tu primer tag arriba.
+                No tags created. Create your first tag above.
               </EmptyState>
             ) : (
               tags.map((tag) => (
@@ -295,13 +295,13 @@ const ManageTagsModal = ({ isOpen, onClose }: ManageTagsModalProps) => {
                       <TagActions>
                         <IconButton
                           onClick={() => handleStartEdit(tag.id, tag.name, tag.color)}
-                          title="Editar"
+                          title="Edit"
                         >
                           ✏️
                         </IconButton>
                         <IconButton
                           onClick={() => handleDeleteTag(tag.id)}
-                          title="Eliminar"
+                          title="Delete"
                         >
                           🗑️
                         </IconButton>
@@ -316,7 +316,7 @@ const ManageTagsModal = ({ isOpen, onClose }: ManageTagsModalProps) => {
 
         <FooterWrapper>
           <Button variant="outline" size="md" onClick={onClose}>
-            Cerrar
+            Close
           </Button>
         </FooterWrapper>
       </ContentWrapper>

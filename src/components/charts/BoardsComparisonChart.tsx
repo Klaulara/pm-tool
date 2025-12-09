@@ -49,14 +49,14 @@ export const BoardsComparisonChart = memo(function BoardsComparisonChart({ board
         labels: boards.map((b) => b.name),
         datasets: [
           {
-            label: 'Tareas Totales',
+            label: 'Total Tasks',
             data: boards.map((b) => b.total),
             backgroundColor: 'rgba(59, 130, 246, 0.8)',
             borderColor: 'rgba(59, 130, 246, 1)',
             borderWidth: 1,
           },
           {
-            label: 'Tareas Completadas',
+            label: 'Completed Tasks',
             data: boards.map((b) => b.completed),
             backgroundColor: 'rgba(16, 185, 129, 0.8)',
             borderColor: 'rgba(16, 185, 129, 1)',
@@ -109,7 +109,7 @@ export const BoardsComparisonChart = memo(function BoardsComparisonChart({ board
 
   return (
     <ChartContainer>
-      <ChartTitle>Comparación de Tableros</ChartTitle>
+      <ChartTitle>Boards Comparison</ChartTitle>
       <CanvasWrapper>
         <canvas ref={canvasRef}></canvas>
       </CanvasWrapper>

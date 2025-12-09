@@ -49,14 +49,14 @@ export const ActivityChart = memo(function ActivityChart({ data }: ActivityChart
         labels: data.map((d) => d.date),
         datasets: [
           {
-            label: 'Tareas Creadas',
+            label: 'Tasks Created',
             data: data.map((d) => d.created),
             backgroundColor: 'rgba(59, 130, 246, 0.7)',
             borderColor: 'rgba(59, 130, 246, 1)',
             borderWidth: 2,
           },
           {
-            label: 'Tareas Completadas',
+            label: 'Tasks Completed',
             data: data.map((d) => d.completed),
             backgroundColor: 'rgba(16, 185, 129, 0.7)',
             borderColor: 'rgba(16, 185, 129, 1)',
@@ -109,7 +109,7 @@ export const ActivityChart = memo(function ActivityChart({ data }: ActivityChart
 
   return (
     <ChartContainer>
-      <ChartTitle>Tareas Completadas - Últimos 7 Días</ChartTitle>
+      <ChartTitle>Tasks Completed - Last 7 Days</ChartTitle>
       <CanvasWrapper>
         <canvas ref={canvasRef}></canvas>
       </CanvasWrapper>

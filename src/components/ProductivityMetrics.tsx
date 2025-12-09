@@ -59,28 +59,28 @@ export const ProductivityMetrics = memo(function ProductivityMetrics({
 }: ProductivityMetricsProps) {
   return (
     <MetricsContainer>
-      <MetricsTitle>Métricas de Productividad</MetricsTitle>
+      <MetricsTitle>Productivity Metrics</MetricsTitle>
       <MetricsGrid>
         <MetricItem>
           <MetricValue $color="#10B981">{completedToday}</MetricValue>
-          <MetricLabel>Completadas Hoy</MetricLabel>
+          <MetricLabel>Completed Today</MetricLabel>
         </MetricItem>
         <MetricItem>
           <MetricValue $color="#3B82F6">{completedThisWeek}</MetricValue>
-          <MetricLabel>Esta Semana</MetricLabel>
+          <MetricLabel>This Week</MetricLabel>
         </MetricItem>
         <MetricItem>
           <MetricValue $color="#8B5CF6">{averagePerDay.toFixed(1)}</MetricValue>
-          <MetricLabel>Promedio/Día</MetricLabel>
+          <MetricLabel>Average/Day</MetricLabel>
         </MetricItem>
         <MetricItem>
           <MetricValue $color="#EF4444">{overdueTasks}</MetricValue>
-          <MetricLabel>Vencidas</MetricLabel>
+          <MetricLabel>Overdue</MetricLabel>
         </MetricItem>
         {velocity !== undefined && (
           <MetricItem>
             <MetricValue $color="#F59E0B">{velocity.toFixed(1)}</MetricValue>
-            <MetricLabel>Velocidad/Semana</MetricLabel>
+            <MetricLabel>Velocity/Week</MetricLabel>
           </MetricItem>
         )}
       </MetricsGrid>

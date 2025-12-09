@@ -68,7 +68,7 @@ describe('<TaskCard /> Drag and Drop', () => {
     cy.mount(<TaskCardTestWrapper task={mockTask} />)
 
     cy.contains('Test Task').should('be.visible')
-    cy.contains('Media').should('be.visible')
+    cy.contains('Medium').should('be.visible')
   })
 
   it('delete button is present and can be clicked', () => {
@@ -119,7 +119,7 @@ describe('<TaskCard /> Drag and Drop', () => {
     const highPriorityTask = { ...mockTask, priority: 'high' as const }
     cy.mount(<TaskCardTestWrapper task={highPriorityTask} />)
 
-    cy.contains('Alta').should('be.visible')
+    cy.contains('High').should('be.visible')
   })
 
   it('displays due date when present', () => {

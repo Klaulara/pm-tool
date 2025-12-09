@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, memo } from 'react';
+import { useState, memo, useMemo, useCallback } from 'react';
 import { useBoardStore } from '@/store/boards';
 import { useTaskStore } from '@/store/tasks';
-import { TaskFilters } from '@/types/store';
+import { TaskFilters, Task, Board, Tag as TagType } from '@/types/store';
 import styled from 'styled-components';
 import Header from '@/components/Header';
 import TaskSearch from '@/components/TaskSearch';
@@ -122,8 +122,16 @@ const EmptySubtext = styled.p`
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
-// Memoized task card for virtualized rendering
-const VirtualizedTaskCard = memo(({ task, board, getPriorityBadgeVariant, formatDate, isOverdue }: any) => {
+// Memoized task card component for optimized rendering
+interface TaskCardItemProps {
+  task: Task;
+  board: Board | undefined;
+  getPriorityBadgeVariant: (priority: string) => 'urgent' | 'error' | 'warning' | 'info';
+  formatDate: (dateString?: string) => string | null;
+  isOverdue: (dueDate?: string) => boolean;
+}
+
+const TaskCardItem = memo(({ task, board, getPriorityBadgeVariant, formatDate, isOverdue }: TaskCardItemProps) => {
   const priorityColor = getPriorityColor(task.priority);
   
   return (
@@ -141,7 +149,7 @@ const VirtualizedTaskCard = memo(({ task, board, getPriorityBadgeVariant, format
 
       {task.tags && task.tags.length > 0 && (
         <TagsContainer>
-          {task.tags.map((tag: any) => (
+          {task.tags.map((tag: TagType) => (
             <Tag key={tag.id} $color={tag.color}>
               {tag.name}
             </Tag>
@@ -151,7 +159,7 @@ const VirtualizedTaskCard = memo(({ task, board, getPriorityBadgeVariant, format
 
       <TaskMeta>
         <MetaItem>
-          📊 <strong>{board?.name || 'Board desconocido'}</strong>
+          📊 <strong>{board?.name || 'Unknown Board'}</strong>
         </MetaItem>
         <MetaItem>
           📌 Status: <strong>{task.status}</strong>
@@ -164,16 +172,24 @@ const VirtualizedTaskCard = memo(({ task, board, getPriorityBadgeVariant, format
         )}
         {task.subTasks && task.subTasks.length > 0 && (
           <MetaItem>
-            ✓ {task.subTasks.filter((st: any) => st.completed).length}/{task.subTasks.length} subtareas
+            ✓ {task.subTasks.filter((st) => st.completed).length}/{task.subTasks.length} subtasks
           </MetaItem>
         )}
         <MetaItem>
-          🕒 Creada: {formatDate(task.createdAt)}
+          🕒 Created: {formatDate(task.createdAt)}
         </MetaItem>
       </TaskMeta>
     </TaskCard>
   );
+}, (prevProps, nextProps) => {
+  // Custom comparison for better memoization
+  return (
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.updatedAt === nextProps.task.updatedAt
+  );
 });
+
+TaskCardItem.displayName = 'TaskCardItem';
 
 const ResultsCount = styled.div`
   font-size: ${({ theme }) => theme.typography.fontSizes.sm};
@@ -190,16 +206,20 @@ const TasksPage = () => {
     sortDirection: 'desc',
   });
 
-  const filteredTasks = searchAndFilterTasks(filters);
+  // Memoize filtered tasks to prevent re-computation on every render
+  const filteredTasks = useMemo(() => {
+    return searchAndFilterTasks(filters);
+  }, [searchAndFilterTasks, filters]);
 
-  const handleFiltersChange = (newFilters: TaskFilters) => {
+  // Memoize callback to prevent re-creating on every render
+  const handleFiltersChange = useCallback((newFilters: TaskFilters) => {
     setFilters(newFilters);
-  };
+  }, []);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { 
+    return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'short', 
       day: 'numeric' 
@@ -226,7 +246,7 @@ const TasksPage = () => {
       <Header />
       <Main>
         <Container>
-          <PageTitle>Todas las Tareas</PageTitle>
+          <PageTitle>All Tasks</PageTitle>
           
           <TaskSearch 
             onFiltersChange={handleFiltersChange}
@@ -234,17 +254,17 @@ const TasksPage = () => {
           />
 
           <ResultsCount>
-            {filteredTasks.length} {filteredTasks.length === 1 ? 'tarea encontrada' : 'tareas encontradas'}
+            {filteredTasks.length} {filteredTasks.length === 1 ? 'task found' : 'tasks found'}
           </ResultsCount>
 
           {filteredTasks.length === 0 ? (
             <EmptyState>
               <EmptyIcon>📋</EmptyIcon>
-              <EmptyText>No se encontraron tareas</EmptyText>
+              <EmptyText>No tasks found</EmptyText>
               <EmptySubtext>
                 {filters.searchQuery || filters.boardId || filters.priority || (filters.tagIds && filters.tagIds.length > 0)
-                  ? 'Intenta ajustar los filtros de búsqueda'
-                  : 'Comienza creando tu primera tarea en un board'}
+                  ? 'Try adjusting your search filters'
+                  : 'Start by creating your first task in a board'}
               </EmptySubtext>
             </EmptyState>
           ) : (
@@ -252,54 +272,16 @@ const TasksPage = () => {
             <TasksGrid>
               {filteredTasks.map((task) => {
                 const board = getBoardById(task.boardId);
-                const priorityColor = getPriorityColor(task.priority);
 
                 return (
-                  <TaskCard key={task.id} $priority={priorityColor}>
-                    <TaskHeader>
-                      <TaskTitle>{task.title}</TaskTitle>
-                      <Badge variant={getPriorityBadgeVariant(task.priority)}>
-                        {getPriorityLabel(task.priority)}
-                      </Badge>
-                    </TaskHeader>
-
-                    {task.description && (
-                      <TaskDescription>{task.description}</TaskDescription>
-                    )}
-
-                    {task.tags && task.tags.length > 0 && (
-                      <TagsContainer>
-                        {task.tags.map((tag) => (
-                          <Tag key={tag.id} $color={tag.color}>
-                            {tag.name}
-                          </Tag>
-                        ))}
-                      </TagsContainer>
-                    )}
-
-                    <TaskMeta>
-                      <MetaItem>
-                        📊 <strong>{board?.name || 'Board desconocido'}</strong>
-                      </MetaItem>
-                      <MetaItem>
-                        📌 Status: <strong>{task.status}</strong>
-                      </MetaItem>
-                      {task.dueDate && (
-                        <MetaItem style={{ color: isOverdue(task.dueDate) ? '#ef4444' : 'inherit' }}>
-                          📅 {formatDate(task.dueDate)}
-                          {isOverdue(task.dueDate) && ' (Vencida)'}
-                        </MetaItem>
-                      )}
-                      {task.subTasks && task.subTasks.length > 0 && (
-                        <MetaItem>
-                          ✓ {task.subTasks.filter(st => st.completed).length}/{task.subTasks.length} subtareas
-                        </MetaItem>
-                      )}
-                      <MetaItem>
-                        🕒 Creada: {formatDate(task.createdAt)}
-                      </MetaItem>
-                    </TaskMeta>
-                  </TaskCard>
+                  <TaskCardItem
+                    key={task.id}
+                    task={task}
+                    board={board}
+                    getPriorityBadgeVariant={getPriorityBadgeVariant}
+                    formatDate={formatDate}
+                    isOverdue={isOverdue}
+                  />
                 );
               })}
             </TasksGrid>

@@ -399,7 +399,7 @@ const CreateTaskModal = ({
     };
     
     return (
-        <ModalOverlay isOpen={isCreateModalOpen} onClick={() => setIsCreateModalOpen(false)}>
+        <ModalOverlay $isOpen={isCreateModalOpen} onClick={() => setIsCreateModalOpen(false)}>
             <ModalContent size="md" onClick={(e) => e.stopPropagation()}>
                 <ModalHeader>
                     <ModalTitle>Crear Nueva Tarea</ModalTitle>
@@ -417,7 +417,7 @@ const CreateTaskModal = ({
                                 value={newTaskName}
                                 onChange={(e) => handleTitleChange(e.target.value)}
                                 onBlur={() => handleBlur('title')}
-                                fullWidth
+                                $fullWidth
                                 autoFocus
                             />
                         </InputWrapper>
@@ -465,7 +465,7 @@ const CreateTaskModal = ({
 
                     <FormGroup>
                         <Label htmlFor="task-priority">Priority</Label>
-                        <Select id="task-priority" fullWidth 
+                        <Select id="task-priority" $fullWidth 
                             value={newTaskPriority} 
                             onChange={(e) => setNewTaskPriority(e.target.value)}>
                             <option value="low">Low</option>
@@ -484,7 +484,7 @@ const CreateTaskModal = ({
                                 value={newTaskDueDate}
                                 onChange={(e) => handleDueDateChange(e.target.value)}
                                 onBlur={() => handleBlur('dueDate')}
-                                fullWidth
+                                $fullWidth
                             />
                         </InputWrapper>
                         {touched.dueDate && errors.dueDate && <ErrorMessage>{errors.dueDate}</ErrorMessage>}
@@ -503,7 +503,7 @@ const CreateTaskModal = ({
                                     value={newTaskEstimatedHours || ''}
                                     onChange={(e) => handleEstimatedHoursChange(e.target.value)}
                                     onBlur={() => handleBlur('estimatedHours')}
-                                    fullWidth
+                                    $fullWidth
                                 />
                             </InputWrapper>
                             {touched.estimatedHours && errors.estimatedHours && <ErrorMessage>{errors.estimatedHours}</ErrorMessage>}
